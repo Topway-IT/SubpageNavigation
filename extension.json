@@ -1,0 +1,191 @@
+{
+	"name": "SubpageNavigation",
+	"author": "thomas-topway-it",
+	"version": "1.1",
+	"url": "https://www.mediawiki.org/wiki/Extension:SubpageNavigation",
+	"descriptionmsg": "subpagenavigation-extension-desc",
+	"license-name": "GPL-2.0-or-later",
+	"requires": {
+		"MediaWiki": ">= 1.35.0"
+	},
+	"MessagesDirs": {
+		"SubpageNavigation": [
+			"i18n"
+		]
+	},
+	"callback": "SubpageNavigationHooks::onRegistration",
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\SubpageNavigation\\": "includes/tree"
+	},
+	"AutoloadClasses": {
+		"SubpageNavigationHooks": "includes/SubpageNavigationHooks.php",
+		"SubpageNavigation": "includes/SubpageNavigation.php",
+		"SubpageNavigationApiCheckLatestVersion": "includes/api/SubpageNavigationApiCheckLatestVersion.php",
+		"SpecialSubpageNavigationBrowse": "includes/specials/SpecialSubpageNavigationBrowse.php"
+	},
+	"ExtensionMessagesFiles": {
+		"SubpageNavigationAlias": "SubpageNavigation.alias.php",
+		"SubpageNavigationMagic": "SubpageNavigationMagic.i18n.magic.php"
+	},
+	"Hooks": {
+		"BeforeInitialize": "SubpageNavigationHooks::onBeforeInitialize",
+		"SidebarBeforeOutput": "SubpageNavigationHooks::onSidebarBeforeOutput",
+		"MediaWikiServices": "SubpageNavigationHooks::onMediaWikiServices",
+		"BeforePageDisplay": "SubpageNavigationHooks::onBeforePageDisplay",
+		"ArticleViewNavigation": "SubpageNavigationHooks::onArticleViewNavigation",
+		"SkinSubPageSubtitle": "SubpageNavigationHooks::onSkinSubPageSubtitle"
+	},
+	"ConfigRegistry": {
+		"subpagenavigation": "GlobalVarConfig::newInstance"
+	},
+	"SpecialPages": {
+		"SubpageNavigationBrowse": "SpecialSubpageNavigationBrowse"
+	},
+	"APIModules": {
+		"subpagenavigation-tree": {
+			"class": "MediaWiki\\Extension\\SubpageNavigation\\Api",
+			"services": [
+				"ConfigFactory",
+				"LanguageConverterFactory",
+				"MainWANObjectCache"
+			]
+		},
+		"subpagenavigation-check-latest-version": "SubpageNavigationApiCheckLatestVersion"
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "resources",
+		"remoteExtPath": "SubpageNavigation/resources"
+	},
+	"ResourceModules": {
+		"ext.SubpageNavigationSubpages": {
+			"position": "top",
+			"scripts": [
+				"SubpageNavigation.js",
+				"VersionCheck.js"
+			],
+			"styles": [
+				"style.css",
+				"style_list.css"
+			],
+			"dependencies": [
+				"mediawiki.action.edit.collapsibleFooter"
+			],
+			"messages": [
+				"subpagenavigation-jsmodule-outdated-version"
+			]
+		},
+		"ext.SubpageNavigation.tree": {
+			"styles": [
+				"Tree/tree.styles.css",
+				"Tree/tree.css"				
+			],
+			"packageFiles": [
+				"Tree/tree.js",
+				{
+					"name": "data.json",
+					"callback": "MediaWiki\\Extension\\SubpageNavigation\\Tree::getDataForJs"
+				}
+			],
+			"targets": [
+				"desktop",
+				"mobile"
+			],
+			"messages": [
+				"subpagenavigation-tree-collapse",
+				"subpagenavigation-tree-expand",
+				"subpagenavigation-tree-load",
+				"subpagenavigation-tree-loading",
+				"subpagenavigation-tree-nothing-found",
+				"subpagenavigation-tree-no-subcategories",
+				"subpagenavigation-tree-no-parent-categories",
+				"subpagenavigation-tree-no-pages",
+				"subpagenavigation-tree-error",
+				"subpagenavigation-tree-retry"
+			],
+			"dependencies": [
+				"mediawiki.api"
+			]
+		}
+	},
+	"config": {
+		"SubpageNavigationMaxChildren": {
+			"value": 200
+		},
+		"SubpageNavigationAllowTag": {
+			"value": true
+		},
+		"SubpageNavigationDisableCache": {
+			"value": 21600
+		},
+		"SubpageNavigationMaxDepth": {
+			"value": {
+				"10": 1,
+				"20": 1,
+				"0": 2
+			},
+			"merge_strategy": "array_plus"
+		},
+		"SubpageNavigationSidebarRoot": {
+			"value": null
+		},
+		"SubpageNavigationHijackPageCategories": {
+			"value": false
+		},
+		"SubpageNavigationUseCategoryTable": {
+			"value": true
+		},
+		"SubpageNavigationOmitNamespace": {
+			"value": 20
+		},
+		"SubpageNavigationDefaultMode": {
+			"value": 0
+		},
+		"SubpageNavigationDefaultOptions": {
+			"value": {
+				"mode": null,
+				"hideprefix": null,
+				"showcount": false,
+				"namespaces": false,
+				"notranslations": false
+			}
+		},
+		"SubpageNavigationCategoryPageMode": {
+			"value": 0
+		},
+		"SubpageNavigationCategoryPageOptions": {
+			"value": {
+				"mode": null,
+				"showcount": true
+			}
+		},
+		"SubpageNavigationSpecialPageOptions": {
+			"value": {
+				"showcount": true
+			}
+		},
+		"SubpageNavigationSidebarOptions": {
+			"value": {
+				"mode": 0,
+				"hideprefix": 20,
+				"showcount": false,
+				"hideroot": true,
+				"namespaces": false,
+				"depth": 1
+			}
+		},
+		"SubpageNavigationPageCategoryOptions": {
+			"value": {
+				"mode": 100,
+				"hideprefix": 20,
+				"showcount": false,
+				"hideroot": false,
+				"namespaces": false,
+				"depth": 0
+			}
+		}
+	},
+	"ServiceWiringFiles": [
+		"includes/ServiceWiring.php"
+	],
+	"manifest_version": 2
+}
