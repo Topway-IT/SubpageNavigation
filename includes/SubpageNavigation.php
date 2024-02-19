@@ -50,10 +50,37 @@ class SubpageNavigation {
 	}
 
 	/**
+	 * @param string $cookieKey
+	 * @param string $cookieValue
+	 * @return 
+	 */
+	public static function setCookie( $cookieKey, $cookieValue ) {
+	    // setcookie( 'pageencryption-passwordkey', $protected_key_encoded, array $options = []): bool
+    	$context = RequestContext::getMain();
+    	$request = $context->getRequest();
+		$response = $request->response();
+		// $session = SessionManager::getGlobalSession();		
+		// $expiration = $session->getProvider()->getRememberUserDuration();
+		$cookieOptions = self::getCookieOptions();
+		
+		$session = $request->getSession();
+		
+		$sessionProvider = $session->getProvider();
+		// !( $session->getProvider() instanceof CookieSessionProvider )
+		// $info = $sessionProvider->provideSessionInfo( $request );
+		// $provider = $info->getProvider();
+		
+		// @TODO subtract (current time - login time)
+		$expiryValue = $sessionProvider->getRememberUserDuration() + time();
+		return $response->setCookie( $cookieKey, $cookieValue, $expiryValue, $cookieOptions );
+	}
+
+
+	/**
 	 * @param Title $title
 	 * @return string
 	 */
-	public static function getSubpageHeader( $title ) {
+	public static function getTree( $title ) {
 	// Parser $parser, $category, $hideroot = false, array $attr = []
 		
 	
@@ -82,12 +109,20 @@ $argv = [];
 	$cat = $title;
 	// $hideroot = true;
 	$allowMissing = false;
+	// $depth = 1;
+	// 	return $ct->getTag( $parser, $cat, $hideroot, $attr, $depth, $allowMissing );
 	
-		return $ct->getTag( $parser, $cat, $hideroot, $attr, $depth, $allowMissing );
+	$api = false;
+	return $ct->getTag( $parser, $cat, $hideroot, $attr, $api, $allowMissing );
 	
 	
 	
-	
+	}
+	/**
+	 * @param Title $title
+	 * @return string
+	 */
+	public static function getSubpageHeader( $title ) {
 		// or use getPrefixedDBKey
 		$limit = isset( $GLOBALS['wgSubpageNavigationArticleHeaderSubpagesThreshold'] )
 		&& is_numeric( $GLOBALS['wgSubpageNavigationArticleHeaderSubpagesThreshold'] )
@@ -353,6 +388,7 @@ $argv = [];
 	 * @return string|\ResultWrapper
 	 */
 	public static function subpagesSQL( $dbr, $prefix, $namespace, $mode ) {
+	
 		$cond = 'page_namespace = ' . $namespace
 			 . ( $prefix != '/' ? ' AND page_title LIKE ' . $dbr->addQuotes( $prefix . '%' )
 				: '' );

@@ -83,7 +83,11 @@ class Api extends ApiBase {
 		$ct = new Tree( $options );
 		$depth = Tree::capDepth( $ct->getOption( 'mode' ), $depth );
 		$ctConfig = $this->configFactory->makeConfig( 'subpagenavigation' );
-		$html = $this->getHTML( $ct, $title, $depth, $ctConfig );
+		// $html = $this->getHTML( $ct, $title, $depth, $ctConfig );
+		
+		// $html = $this->getHTML( $ct, $title, true, $ctConfig );
+		
+		$html = trim( $ct->renderChildren( $title, true ) );
 
 		$this->getMain()->setCacheMode( 'public' );
 

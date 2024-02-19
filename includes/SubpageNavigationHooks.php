@@ -114,7 +114,6 @@ class SubpageNavigationHooks {
 			return;
 		}
 
-
 $outputPage->addModules( 'ext.SubpageNavigation.tree' );
 
 		// *** this is rendered after than onArticleViewHeader
@@ -129,6 +128,148 @@ $outputPage->addModules( 'ext.SubpageNavigation.tree' );
 		}
 	}
 
+
+	public static function tocList( $toc, Language $lang = null ) {
+		$lang ??= RequestContext::getMain()->getLanguage();
+
+		$title = 'Tree';	// wfMessage( 'toc' )->inLanguage( $lang )->escaped();
+		
+			
+			
+
+		return '<div id="toc" style="margin:auto" class="toc" role="navigation" aria-labelledby="mw-toc-heading">'
+			// . Html::element( 'input', [
+			//	'type' => 'checkbox',
+			//	'role' => 'button',
+			//	'id' => 'toctogglecheckbox',
+			//	'class' => 'toctogglecheckbox',
+			//	'style' => 'display:none',
+			//] )
+			
+			. '<input type="checkbox" role="button" id="toctogglecheckbox"
+				class="toctogglecheckbox" style="display:none" />'
+			
+			
+			. Html::openElement( 'div', [
+				'class' => 'toctitle',
+				'lang' => $lang->getHtmlCode(),
+				'dir' => $lang->getDir(),
+			] )
+			. '<h2 id="mw-toc-heading" style="position:relative;top:auto">' . $title . '</h2>'
+			. '<span class="toctogglespan">'
+			. Html::label( '', 'toctogglecheckbox', [
+				'class' => 'toctogglelabel',
+			] )
+			. '</span>'
+			. '</div>'
+			. $toc
+			. "</div>";
+	}
+	
+	
+
+	/**
+	 * @param OutputPage $out
+	 *
+	 * @return true
+	 */
+	public static function onAfterFinalPageOutput( OutputPage $out ) {
+	
+//	return true;
+	$context = RequestContext::getMain();
+	
+		$html = ob_get_clean();
+		
+		
+
+// Create a new DOMDocument
+$dom = new DOMDocument();
+
+libxml_use_internal_errors(true); // Enable internal error handling
+
+// Load HTML with options to handle HTML5 tags
+$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+
+
+// Find the div by ID
+$parentDiv = $dom->getElementById('mw-panel');
+
+// Check if the div with the specified ID exists
+if ($parentDiv) {
+	$children = $parentDiv->childNodes;
+
+    if ($children->length > 1) {
+        $wrapperDiv = $dom->createElement('div');
+        
+        $wrapperDiv->setAttribute('id', 'subpagenavigation-mw-portlets');
+      
+
+        // Iterate through the children starting from the second one
+        for ($i = 2; $i < $children->length; $i++) {
+            // Append each child to the wrapper div
+            $wrapperDiv->appendChild($children->item($i)->cloneNode(true));
+        }
+
+        // Replace the existing children with the wrapper div
+while ($parentDiv->childNodes->length > 2) {
+    $parentDiv->removeChild($parentDiv->childNodes->item(2));
+}
+       // $parentDiv->appendChild($wrapperDiv);
+        
+        
+        $tree = \SubpageNavigation::getTree( $context->getTitle() );
+		
+	 $newHtml =	self::tocList( $tree );
+	 
+        
+    $fragment = $dom->createDocumentFragment();
+    $fragment->appendXML($newHtml);
+
+    // Append the document fragment to the parent div
+    
+    
+        $tree = $dom->createElement('div'); 
+      //  $tree->setAttribute('style', 'display: none;');
+        
+        
+        
+        
+        $tree->setAttribute('id', 'subpagenavigation-tree');
+        
+    $tree->appendChild($fragment);
+    
+    
+    
+        $container = $dom->createElement('div');
+        $container->setAttribute('id', 'subpagenavigation-tree-container');
+        
+    $container->appendChild($tree);
+    $container->appendChild($wrapperDiv);
+        
+        
+        
+    $parentDiv->appendChild($container);
+    
+    
+    } else {
+    }
+
+    // Output the modified HTML
+    $out = $dom->saveHTML();
+}
+		
+		
+		$out .= '';
+		
+		ob_start();
+		echo $out;
+		
+
+		return true;
+	}
+	
+	
+	
 	/**
 	 * @param Skin $skin
 	 * @param array &$sidebar
@@ -144,12 +285,12 @@ $outputPage->addModules( 'ext.SubpageNavigation.tree' );
 			'text'   => wfMessage( 'subpagenavigation-sidebar' )->text(),
 			'href'   => $specialpage_title->getLocalURL()
 		];
-		
+
 		$sidebar['subpagenavigation-tree'][] = [
 			'text'   => wfMessage( 'subpagenavigation-sidebar' )->text(),
 			'href'   => $specialpage_title->getLocalURL()
 		];
-		
+
 	}
 
 }

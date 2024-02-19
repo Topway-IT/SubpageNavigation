@@ -42,3 +42,10 @@
 .subpagenavigation-article-header-show-more {
 	margin-top: 4px;
 }
+
+.toctogglecheckbox:checked ~ .subpageNavigation {
+    display: none;
+}
+
+
+

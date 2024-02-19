@@ -344,9 +344,13 @@ return;
 	 * @param bool $searchInput
 	 * @return bool|string
 	 */
+	// public function getTag( ?Parser $parser, $category, $hideroot = false, array $attr = [],
+	// 	$depth = 1, $allowMissing = false, $searchInput = false
+	//  ) {
+	
 	public function getTag( ?Parser $parser, $category, $hideroot = false, array $attr = [],
-		$depth = 1, $allowMissing = false, $searchInput = false
-	) {
+		$api = false, $allowMissing = false, $searchInput = false
+	  ) {
 		global $wgCategoryTreeDisableCache;
 
 		$category = trim( $category );
@@ -387,13 +391,14 @@ return;
 			if ( !$hideroot ) {
 				$html = $this->renderNode( $title, $depth );
 			} else {
-				$html = $this->renderChildren( $title, $depth );
+				// $html = $this->renderChildren( $title, $depth );
+				 $html = $this->renderChildren( $title, $api );
 			}
 		}
 		
 		
 				$outText = Html::openElement( 'div', [ 'class' => '' ] );
-		$outText .= 'Subpages';
+		// $outText .= 'Subpages';
 		$outText .= Html::closeElement( 'div' );
 		$outText .= $html;
 		
@@ -405,10 +410,26 @@ return;
 			$outText
 		);
 
-		return Html::rawElement( 'div', $attr, $html );
+		return Html::rawElement( 'div', $attr, $outText );
 	}
 
-
+	public static function getSubpages( $prefix, $namespace, $limit = null ) {
+		$dbr = wfGetDB( DB_REPLICA );
+		$sql = \SubpageNavigation::subpagesSQL( $dbr, $prefix, $namespace, self::MODE_FILESYSTEM );
+		if ( $limit ) {
+			$offset = 0;
+			$sql = $dbr->limitResult( $sql, $limit, $offset );
+		}
+		$res = $dbr->query( $sql, __METHOD__ );
+		$ret = [];
+		foreach ( $res as $row ) {
+			$title = Title::newFromRow( $row );
+			if ( $title->isKnown() ) {
+				$ret[] = $title;
+			}
+		}
+		return $ret;
+	}
 	/**
 	 * Returns a string with an HTML representation of the children of the given category.
 	 * @param Title $title
@@ -416,13 +437,19 @@ return;
 	 * @suppress PhanUndeclaredClassMethod,PhanUndeclaredClassInstanceof
 	 * @return string
 	 */
-	public function renderChildren( Title $title, $depth = 1 ) {
+	// public function renderChildren( Title $title, $depth = 1 ) {
+	public function renderChildren( Title $title, $api = false ) {
 		global $wgCategoryTreeMaxChildren, $wgCategoryTreeUseCategoryTable;
 
-		$prefix = str_replace( ' ', '_', $title->getFullText() );
+		if ( $api === false ) {
+		$prefix = '';
+		} else {
+		 $prefix = str_replace( ' ', '_', $title->getText() );
+		}
+		
 		$namespace = $title->getNamespace();
 		$limit = null;
-	$subpages = \SubpageNavigation::getSubpages( "$prefix/", $namespace, $limit );
+	$subpages = $this->getSubpages( "$prefix/", $namespace, $limit );
 	
 	
 	$titlesText = [];
@@ -430,6 +457,9 @@ return;
 			$titlesText[] = $t->getText();
 			
 		}
+		
+		// print_r($titlesText);
+		
 		
 	$dbr = wfGetDB( DB_REPLICA );
 		$childrenCount = \SubpageNavigation::getChildrenCount( $dbr, $titlesText, $title->getNamespace() );
@@ -439,7 +469,9 @@ return;
 	$cat = null;
 		foreach ( $subpages as $t ) {
 			$titlesText[] = $t->getText();
-			$s = $this->renderNodeInfo( $t, $cat, $depth - 1, array_shift( $childrenCount ), $title );
+			// $s = $this->renderNodeInfo( $t, $cat, $depth - 1, array_shift( $childrenCount ), $title );
+			$s = $this->renderNodeInfo( $t, $cat, $api, array_shift( $childrenCount ), $title );
+
 
 			$categories .= $s;
 		}
@@ -482,7 +514,9 @@ return;
 	 * @param int $children
 	 * @return string
 	 */
-	public function renderNodeInfo( Title $title, Category $cat = null, $children = 0, $count = 0, $parentTitle = null ) {
+	// public function renderNodeInfo( Title $title, Category $cat = null, $children = 0, $count = 0, $parentTitle = null ) {
+	public function renderNodeInfo( Title $title, Category $cat = null, $api = false, $count = 0, $parentTitle = null ) {
+	
 		$mode = $this->getOption( 'mode' );
 
 
@@ -511,7 +545,11 @@ $hideprefix = true;
 		} else {
 			$label = $title->getPrefixedText();
 		}
+
+if ( $api ) {
 $label = substr( $label, strlen( $parentTitle->getText() ) + 1);
+}
+
 		$link = $this->linkRenderer->makeLink( $title, $label );
 
 		// $count = false;
@@ -545,7 +583,10 @@ $label = substr( $label, strlen( $parentTitle->getText() ) + 1);
 				$dbr = wfGetDB( DB_REPLICA );
 		// $childrenCount = SubpageNavigation::getChildrenCount( $dbr, $titlesText, $title->getNamespace() );
 		
-		
+$title_ = RequestContext::getMain()->getTitle();
+	 $children = 1;
+	 
+	 $expanded = strpos( $title_->getText(), $title->getText() ) === 0;
 				// ***edited
 			//$count = 5;
 			if ( $count === 0 ) {
@@ -557,8 +598,8 @@ $label = substr( $label, strlen( $parentTitle->getText() ) + 1);
 					'data-ct-title' => $key,
 				];
 				// ***edited
-// $children = 0;
-				if ( $children === 0 ) {
+
+				if ( !$expanded  ) {
 					$linkattr['data-ct-state'] = 'collapsed';
 				} else {
 					$linkattr['data-ct-loaded'] = true;
@@ -589,8 +630,12 @@ $label = substr( $label, strlen( $parentTitle->getText() ) + 1);
 			]
 		);
 
-		if ( $ns === NS_CATEGORY && $children > 0 ) {
-			$children = $this->renderChildren( $title, $children );
+
+		// if ( $ns === NS_CATEGORY && $children > 0 ) {
+	//	if ( !$api ) {
+	
+	if ( strpos( $title_->getText(), $title->getText() ) === 0 ) {
+			$children = $this->renderChildren( $title, true );
 			if ( $children === '' ) {
 				switch ( $mode ) {
 					case TreeMode::CATEGORIES:

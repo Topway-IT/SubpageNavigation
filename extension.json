@@ -33,7 +33,8 @@
 		"MediaWikiServices": "SubpageNavigationHooks::onMediaWikiServices",
 		"BeforePageDisplay": "SubpageNavigationHooks::onBeforePageDisplay",
 		"ArticleViewNavigation": "SubpageNavigationHooks::onArticleViewNavigation",
-		"SkinSubPageSubtitle": "SubpageNavigationHooks::onSkinSubPageSubtitle"
+		"SkinSubPageSubtitle": "SubpageNavigationHooks::onSkinSubPageSubtitle",
+		"AfterFinalPageOutput": "SubpageNavigationHooks::onAfterFinalPageOutput"
 	},
 	"ConfigRegistry": {
 		"subpagenavigation": "GlobalVarConfig::newInstance"

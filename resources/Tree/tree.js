@@ -107,6 +107,8 @@ config = {defaultCtOptions: {} };
 	 * @param {jQuery} $children
 	 */
 	loadChildren = function ( $link, $children ) {
+	
+	
 		var $linkParentCTTag, ctTitle, ctMode, ctOptions;
 
 		/**
@@ -192,7 +194,7 @@ config = {defaultCtOptions: {} };
 	};
 
 	// Register click events
-	mw.hook( 'wikipage.content' ).add( attachHandler );
+	// mw.hook( 'wikipage.content' ).add( attachHandler );
 
 	// Attach click handler for categories.
 	// This is needed when wgCategoryTreeHijackPageCategories is enabled.
@@ -201,7 +203,46 @@ config = {defaultCtOptions: {} };
 	$( function () {
 		// Attach click handler for sidebar
 		// eslint-disable-next-line no-jquery/no-global-selector
-		attachHandler( $( '#p-categorytree-portlet' ) );
+		// attachHandler( $( '#p-categorytree-portlet' ) );
+		
+		attachHandler( $( '#subpagenavigation-tree' ) );
 	} );
+	
+	
+	function initToc( tocNode ) {
+		var hidden = false,
+			toggleNode = tocNode.querySelector( '.toctogglecheckbox' );
+			
+			console.log('toggleNode',toggleNode)
+
+		if ( !toggleNode ) {
+			return;
+		}
+
+		toggleNode.addEventListener( 'change', function () {
+			hidden = !hidden;
+			mw.cookie.set( 'hidetoc', hidden ? '1' : null );
+		} );
+
+		// Initial state
+		if ( mw.cookie.get( 'hidetoc' ) === '1' ) {
+			toggleNode.checked = true;
+			hidden = true;
+		}
+	}
+
+
+initToc( $( '#subpagenavigation-tree' ).get(0) );
+
+/*
+	mw.hook( 'wikipage.content' ).add( function ( $content ) {
+		var tocs = $content[ 0 ] ? $content[ 0 ].querySelectorAll( '.toc' ) : [],
+			i = tocs.length;
+		while ( i-- ) {
+			initToc( tocs[ i ] );
+		}
+	} );
+*/
+	
 
 }() );
