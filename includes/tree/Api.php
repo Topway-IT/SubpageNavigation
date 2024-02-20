@@ -73,7 +73,10 @@ class Api extends ApiBase {
 			$options = get_object_vars( $options );
 		}
 
-		$title = Tree::makeTitle( $params['category'] );
+
+
+
+		$title = Tree::makeTitle( $params['category'], (int)$options['namespace'] );
 		if ( !$title || $title->isExternal() ) {
 			$this->dieWithError( [ 'apierror-invalidtitle', wfEscapeWikiText( $params['category'] ) ] );
 		}

@@ -26,7 +26,9 @@
 console.log('a')
 ( function () {
 	var loadChildren,
-		//config = require( './data.json' );
+		config = require( './data.json' );
+		
+		console.log('config',config)
 
 config = {defaultCtOptions: {} };
 
@@ -152,7 +154,14 @@ config = {defaultCtOptions: {} };
 		ctTitle = $link.attr( 'data-ct-title' );
 		ctMode = $linkParentCTTag.data( 'ct-mode' );
 		ctMode = typeof ctMode === 'number' ? ctMode : undefined;
+		
+		console.log('ctOptions',$linkParentCTTag.attr( 'data-ct-options' ))
+		
 		ctOptions = $linkParentCTTag.attr( 'data-ct-options' ) || config.defaultCtOptions;
+
+
+		console.log('ctOptions',ctOptions)
+
 
 		// Mode and options have defaults or fallbacks, title does not.
 		// Don't make a request if there is no title.
@@ -161,7 +170,7 @@ config = {defaultCtOptions: {} };
 			return;
 		}
 		
-		console.log('category', ctTitle)
+		console.log('ctTitle', ctTitle)
 		console.log('options', ctOptions)
 
 		new mw.Api().get( {

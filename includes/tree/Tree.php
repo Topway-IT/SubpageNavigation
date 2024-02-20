@@ -38,9 +38,6 @@ class Tree {
 	
 	public static function getDataForJs() {
 		global $wgCategoryTreeCategoryPageOptions;
-		return [
-			'defaultCtOptions' => 'abc',
-		];
 
 		// Look, this is pretty bad but CategoryTree is just whacky, it needs to be rewritten
 		$ct = new Tree( $wgCategoryTreeCategoryPageOptions );
@@ -61,6 +58,8 @@ $this->mOptions = [
 	'mode' => TreeMode::PAGES,
 	'hideprefix' => false,
 	'showcount' => true,
+	// 'namespace' => RequestContext::getMain()->getTitle()->getNamespace()
+			
 ];
 return;
 		// ensure default values and order of options.
@@ -323,6 +322,7 @@ return;
 	public function getOptionsAsJsStructure( $depth = null ) {
 		if ( $depth !== null ) {
 			$opt = $this->mOptions;
+			$opt[ 'namespace'] = RequestContext::getMain()->getTitle()->getNamespace();
 			$opt['depth'] = $depth;
 			$s = self::encodeOptions( $opt, 'json' );
 		} else {
@@ -378,7 +378,15 @@ return;
 		}
 
 		$attr['data-ct-mode'] = $this->mOptions['mode'];
-		$attr['data-ct-options'] = $this->getOptionsAsJsStructure();
+		
+		
+		// $attr['data-ct-options'] = $this->getOptionsAsJsStructure();
+		$attr['data-ct-options'] =  self::encodeOptions( [
+			'namespace' => $title->getNamespace()
+		
+		], 'json' );
+		
+		
 
 		if ( !$allowMissing && !$title->getArticleID() ) {
 			$html = Html::rawElement( 'span', [ 'class' => 'CategoryTreeNotice' ],
@@ -402,6 +410,8 @@ return;
 		$outText .= Html::closeElement( 'div' );
 		$outText .= $html;
 		
+		$attr['class'] = $attr['class'] . ' subpageNavigation-tree mw-pt-translate-navigation noprint';
+		/*
 		return Html::rawElement(
 			'div',
 			[
@@ -409,7 +419,7 @@ return;
 			],
 			$outText
 		);
-
+*/
 		return Html::rawElement( 'div', $attr, $outText );
 	}
 
@@ -447,7 +457,9 @@ return;
 		 $prefix = str_replace( ' ', '_', $title->getText() );
 		}
 		
-		$namespace = $title->getNamespace();
+		 $namespace = $title->getNamespace();
+		// $namespace = RequestContext::getMain()->getTitle()->getNamespace();
+		
 		$limit = null;
 	$subpages = $this->getSubpages( "$prefix/", $namespace, $limit );
 	
@@ -462,13 +474,13 @@ return;
 		
 		
 	$dbr = wfGetDB( DB_REPLICA );
-		$childrenCount = \SubpageNavigation::getChildrenCount( $dbr, $titlesText, $title->getNamespace() );
+		$childrenCount = \SubpageNavigation::getChildrenCount( $dbr, $titlesText, $namespace );
 		
 	
 	$categories = '';
 	$cat = null;
 		foreach ( $subpages as $t ) {
-			$titlesText[] = $t->getText();
+			// $titlesText[] = $t->getText();
 			// $s = $this->renderNodeInfo( $t, $cat, $depth - 1, array_shift( $childrenCount ), $title );
 			$s = $this->renderNodeInfo( $t, $cat, $api, array_shift( $childrenCount ), $title );
 
@@ -751,7 +763,7 @@ $title_ = RequestContext::getMain()->getTitle();
 	 * @param string $title
 	 * @return null|Title
 	 */
-	public static function makeTitle( $title ) {
+	public static function makeTitle( $title, $namespace = null ) {
 	
 		$title = trim( strval( $title ) );
 
@@ -759,8 +771,12 @@ $title_ = RequestContext::getMain()->getTitle();
 			return null;
 		}
 		
+		// $title_ = RequestContext::getMain()->getTitle();
+		// trigger_error('$namespace' . $namespace);
 		// ***edited
-		$t = Title::newFromText( $title );
+		$t = Title::newFromText( $title, $namespace );
+		
+		// trigger_error($title_->getNamespace());
 		
 		return $t;
 

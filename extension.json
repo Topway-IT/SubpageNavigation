@@ -83,7 +83,7 @@
 			"packageFiles": [
 				"Tree/tree.js",
 				{
-					"name": "data.json",
+					"name": "Tree/data.json",
 					"callback": "MediaWiki\\Extension\\SubpageNavigation\\Tree::getDataForJs"
 				}
 			],
