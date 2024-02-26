@@ -103,9 +103,7 @@
 				"subpagenavigation-tree-load",
 				"subpagenavigation-tree-loading",
 				"subpagenavigation-tree-nothing-found",
-				"subpagenavigation-tree-no-subcategories",
-				"subpagenavigation-tree-no-parent-categories",
-				"subpagenavigation-tree-no-pages",
+				"subpagenavigation-tree-no-subpages",
 				"subpagenavigation-tree-error",
 				"subpagenavigation-tree-retry"
 			],

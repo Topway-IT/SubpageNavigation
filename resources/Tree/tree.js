@@ -25,14 +25,9 @@
 ( function () {
 	var loadChildren,
 		config = require( './data.json' );
-		
-		console.log('config',config)
-
 		// config = {defaultCtOptions: {} };
 
 	/**
-	 * Expands a given node (loading it's children if not loaded)
-	 *
 	 * @param {jQuery} $link
 	 */
 	function expandNode( $link ) {
@@ -52,8 +47,6 @@
 	}
 
 	/**
-	 * Collapses a node
-	 *
 	 * @param {jQuery} $link
 	 */
 	function collapseNode( $link ) {
@@ -81,8 +74,6 @@
 	}
 
 	/**
-	 * Attach click handler to buttons
-	 *
 	 * @param {jQuery} $content
 	 */
 	function attachHandler( $content ) {
@@ -99,8 +90,6 @@
 	}
 
 	/**
-	 * Loads children for a node via an HTTP call
-	 *
 	 * @param {jQuery} $link
 	 * @param {jQuery} $children
 	 */
@@ -142,13 +131,9 @@
 		);
 
 		$linkParentCTTag = $link.parents( '.SubpageNavigationTreeTag' );
-
 		ctTitle = $link.attr( 'data-subpagenavigation-title' );
-
 		ctOptions = $linkParentCTTag.attr( 'data-subpagenavigation-options' ) || config.defaultCtOptions;
 
-		console.log('ctTitle', ctTitle)
-		console.log('options', ctOptions)
 		if ( !ctTitle ) {
 			error();
 			return;
@@ -162,17 +147,13 @@
 			formatversion: 2
 		} ).done( function ( data ) {
 			var $data;
-		console.log('data', data)
-
 			data = data['subpagenavigation-tree'].html;
 
 			if ( data === '' ) {
 				$data = $( '<i>' ).addClass( 'SubpageNavigationTreeNotice' )
 					// eslint-disable-next-line mediawiki/msg-doc
 					.text( mw.msg( {
-						0: 'subpagenavigation-tree-no-subcategories',
-						10: 'subpagenavigation-tree-no-pages',
-						100: 'subpagenavigation-tree-no-parent-categories'
+						0: 'subpagenavigation-tree-no-subpages'
 					}[ ctMode ] || 'subpagenavigation-tree-nothing-found' ) );
 			} else {
 				$data = $( $.parseHTML( data ) );
@@ -187,13 +168,11 @@
 		// eslint-disable-next-line no-jquery/no-global-selector
 		attachHandler( $( '#subpagenavigation-tree' ) );
 	} );
-	
-	
+
+	// @see mediawiki.toc/toc.js
 	function initToc( tocNode ) {
 		var hidden = false,
 			toggleNode = tocNode.querySelector( '.toctogglecheckbox' );
-			
-			console.log('toggleNode',toggleNode)
 
 		if ( !toggleNode ) {
 			return;
@@ -204,25 +183,12 @@
 			mw.cookie.set( 'hidetoc', hidden ? '1' : null );
 		} );
 
-		// Initial state
 		if ( mw.cookie.get( 'hidetoc' ) === '1' ) {
 			toggleNode.checked = true;
 			hidden = true;
 		}
 	}
 
-
-initToc( $( '#subpagenavigation-tree' ).get(0) );
-
-/*
-	mw.hook( 'wikipage.content' ).add( function ( $content ) {
-		var tocs = $content[ 0 ] ? $content[ 0 ].querySelectorAll( '.toc' ) : [],
-			i = tocs.length;
-		while ( i-- ) {
-			initToc( tocs[ i ] );
-		}
-	} );
-*/
-	
+	initToc( $( '#subpagenavigation-tree' ).get(0) );
 
 }() );
