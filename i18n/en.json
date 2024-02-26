@@ -18,6 +18,8 @@
 	"subpagenavigation-browse-folders": "folders",
 	"subpagenavigation-browse-filesystem": "filesystem",
 	
+	"subpagenavigation-toc-title": "Tree",
+	
 	"subpagenavigation-tree": "Category tree",
 	"subpagenavigation-tree-portlet": "Categories",
 	"subpagenavigation-tree-legend": "Show category tree",
@@ -32,8 +34,8 @@
 	"subpagenavigation-tree-mode-all": "all pages",
 	"subpagenavigation-tree-collapse": "collapse",
 	"subpagenavigation-tree-expand": "expand",
-	"subpagenavigation-tree-member-counts": "Contains {{PLURAL:$1|1 subcategory|$1 subcategories}}, {{PLURAL:$2|1 page|$2 pages}}, and {{PLURAL:$3|1 file|$3 files}}",
-	"subpagenavigation-tree-member-num": "($5)",
+	"subpagenavigation-tree-member-counts": "Contains {{PLURAL:$1|1 subpage|$1 subpages}}",
+	"subpagenavigation-tree-member-num": "($1)",
 	"subpagenavigation-tree-num-categories": "$1 C",
 	"subpagenavigation-tree-num-pages": "$1 P",
 	"subpagenavigation-tree-num-files": "$1 F",

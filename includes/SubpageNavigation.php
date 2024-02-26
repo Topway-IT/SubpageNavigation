@@ -21,7 +21,6 @@
  * @copyright Copyright ©2023, https://wikisphere.org
  */
 use MediaWiki\MediaWikiServices;
-use MediaWiki\Extension\SubpageNavigation\Tree as SubpageNavigationTree;
 
 class SubpageNavigation {
 	const MODE_DEFAULT = 1;
@@ -75,49 +74,6 @@ class SubpageNavigation {
 		return $response->setCookie( $cookieKey, $cookieValue, $expiryValue, $cookieOptions );
 	}
 
-
-	/**
-	 * @param Title $title
-	 * @return string
-	 */
-	public static function getTree( $title ) {
-	// Parser $parser, $category, $hideroot = false, array $attr = []
-		
-	
-		$options = [];
-		$ct = new SubpageNavigationTree( $options );
-
-$argv = [];
-		$attr = Sanitizer::validateTagAttributes( $argv, 'div' );
-
-		$hideroot = isset( $argv['hideroot'] )
-			? CategoryTree::decodeBoolean( $argv['hideroot'] ) : null;
-		$onlyroot = isset( $argv['onlyroot'] )
-			? CategoryTree::decodeBoolean( $argv['onlyroot'] ) : null;
-		$depthArg = isset( $argv['depth'] ) ? (int)$argv['depth'] : null;
-
-		$searchInput = isset( $argv['search-input'] );
-
-		$depth = SubpageNavigationTree::capDepth( $ct->getOption( 'mode' ), $depthArg );
-		if ( $onlyroot ) {
-			$depth = 0;
-		}
-
-	
-	
-	$parser =  null;
-	$cat = $title;
-	// $hideroot = true;
-	$allowMissing = false;
-	// $depth = 1;
-	// 	return $ct->getTag( $parser, $cat, $hideroot, $attr, $depth, $allowMissing );
-	
-	$api = false;
-	return $ct->getTag( $parser, $cat, $hideroot, $attr, $api, $allowMissing );
-	
-	
-	
-	}
 	/**
 	 * @param Title $title
 	 * @return string
@@ -258,7 +214,7 @@ $argv = [];
 		if ( is_object( $title ) && $title->isKnown() ) {
 			array_pop( $arr );
 
-			// handle non existing article
+		// handle non existing article
 		} else {
 			$current = substr( $title->getText(), strlen( $currentTitle->getText() ) + 1 );
 		}
@@ -321,7 +277,8 @@ $argv = [];
 	 * @return array
 	 */
 	public static function getChildrenCount( $dbr, $titlesText, $namespace ) {
-		// @ATTENTION!! removed from Wikimedia\Rdbms\Database since MW 1.4.1 !!
+		// @ATTENTION!! queryMulti has been removed
+		// from Wikimedia\Rdbms\Database since MW 1.4.1 !!
 		if ( !method_exists( $dbr, 'queryMulti' ) ) {
 			// @credits: Zoranzoki21 aka Kizule
 			$sqls = array_map( function ( $text ) use ( $dbr, $namespace ) {

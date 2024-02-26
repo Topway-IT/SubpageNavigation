@@ -1,36 +1,34 @@
 /**
- * JavaScript for the CategoryTree extension.
+ * This file is part of the MediaWiki extension SubpageNavigation.
  *
- * © 2006 Daniel Kinzler
- *
- * This program is free software; you can redistribute it and/or modify
+ * SubpageNavigation is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * SubpageNavigation is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- * http://www.gnu.org/copyleft/gpl.html
+ * You should have received a copy of the GNU General Public License
+ * along with SubpageNavigation.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @file
- * @author Daniel Kinzler, brightbyte.de
- * @author thomas-topway-it for K-MA (search-input)
+ * @ingroup extensions
+ * @author thomas-topway-it <support@topway.it>
+ * @copyright Copyright ©2023-2024, https://wikisphere.org
  */
 
-console.log('a')
+// @credits: https://www.mediawiki.org/wiki/Extension:CategoryTree
+
 ( function () {
 	var loadChildren,
 		config = require( './data.json' );
 		
 		console.log('config',config)
 
-config = {defaultCtOptions: {} };
+		// config = {defaultCtOptions: {} };
 
 	/**
 	 * Expands a given node (loading it's children if not loaded)
@@ -39,16 +37,16 @@ config = {defaultCtOptions: {} };
 	 */
 	function expandNode( $link ) {
 		// Show the children node
-		var $children = $link.parents( '.CategoryTreeItem' )
-			.siblings( '.CategoryTreeChildren' )
+		var $children = $link.parents( '.SubpageNavigationTreeItem' )
+			.siblings( '.SubpageNavigationTreeChildren' )
 			.css( 'display', '' );
 
 		$link.attr( {
-			title: mw.msg( 'categorytree-collapse' ),
-			'data-ct-state': 'expanded'
+			title: mw.msg( 'subpagenavigation-tree-collapse' ),
+			'data-subpagenavigation-state': 'expanded'
 		} );
 
-		if ( !$link.data( 'ct-loaded' ) ) {
+		if ( !$link.data( 'subpagenavigation-loaded' ) ) {
 			loadChildren( $link, $children );
 		}
 	}
@@ -60,24 +58,22 @@ config = {defaultCtOptions: {} };
 	 */
 	function collapseNode( $link ) {
 		// Hide the children node
-		$link.parents( '.CategoryTreeItem' )
-			.siblings( '.CategoryTreeChildren' )
+		$link.parents( '.SubpageNavigationTreeItem' )
+			.siblings( '.SubpageNavigationTreeChildren' )
 			.css( 'display', 'none' );
 
 		$link.attr( {
-			title: mw.msg( 'categorytree-expand' ),
-			'data-ct-state': 'collapsed'
+			title: mw.msg( 'subpagenavigation-tree-expand' ),
+			'data-subpagenavigation-state': 'collapsed'
 		} );
 	}
 
 	/**
-	 * Handles clicks on the expand buttons, and calls the appropriate function
-	 *
-	 * @this {Element} CategoryTreeToggle
+	 * @this {Element} SubpageNavigationTreeToggle
 	 */
 	function handleNode() {
 		var $link = $( this );
-		if ( $link.attr( 'data-ct-state' ) === 'collapsed' ) {
+		if ( $link.attr( 'data-subpagenavigation-state' ) === 'collapsed' ) {
 			expandNode( $link );
 		} else {
 			collapseNode( $link );
@@ -90,16 +86,16 @@ config = {defaultCtOptions: {} };
 	 * @param {jQuery} $content
 	 */
 	function attachHandler( $content ) {
-		$content.find( '.CategoryTreeToggle' )
+		$content.find( '.SubpageNavigationTreeToggle' )
 			.on( 'click', handleNode )
 			.attr( 'title', function () {
 				return mw.msg(
-					$( this ).attr( 'data-ct-state' ) === 'collapsed' ?
-						'categorytree-expand' :
-						'categorytree-collapse'
+					$( this ).attr( 'data-subpagenavigation-state' ) === 'collapsed' ?
+						'csubpagenavigation-tree-expand' :
+						'subpagenavigation-tree-collapse'
 				);
 			} )
-			.addClass( 'CategoryTreeToggleHandlerAttached' );
+			.addClass( 'SubpageNavigationTreeToggleHandlerAttached' );
 	}
 
 	/**
@@ -109,9 +105,7 @@ config = {defaultCtOptions: {} };
 	 * @param {jQuery} $children
 	 */
 	loadChildren = function ( $link, $children ) {
-	
-	
-		var $linkParentCTTag, ctTitle, ctMode, ctOptions;
+		var $linkParentCTTag, ctTitle, ctOptions;
 
 		/**
 		 * Error callback
@@ -120,7 +114,7 @@ config = {defaultCtOptions: {} };
 			var $retryLink;
 
 			$retryLink = $( '<a>' )
-				.text( mw.msg( 'categorytree-retry' ) )
+				.text( mw.msg( 'subpagenavigation-tree-retry' ) )
 				.attr( {
 					role: 'button',
 					tabindex: 0
@@ -135,47 +129,34 @@ config = {defaultCtOptions: {} };
 				} );
 
 			$children
-				.text( mw.msg( 'categorytree-error' ) + ' ' )
+				.text( mw.msg( 'subpagenavigation-tree-error' ) + ' ' )
 				.append( $retryLink );
 		}
 
-		$link.data( 'ct-loaded', true );
+		$link.data( 'subpagenavigation-loaded', true );
 
 		$children.empty().append(
 			$( '<i>' )
-				.addClass( 'CategoryTreeNotice' )
+				.addClass( 'SubpageNavigationTreeNotice' )
 				.text( mw.msg( 'subpagenavigation-tree-loading' ) )
 		);
 
-		$linkParentCTTag = $link.parents( '.CategoryTreeTag' );
+		$linkParentCTTag = $link.parents( '.SubpageNavigationTreeTag' );
 
-		// Element may not have a .CategoryTreeTag parent, fallback to defauls
-		// Probably a CategoryPage (@todo: based on what?)
-		ctTitle = $link.attr( 'data-ct-title' );
-		ctMode = $linkParentCTTag.data( 'ct-mode' );
-		ctMode = typeof ctMode === 'number' ? ctMode : undefined;
-		
-		console.log('ctOptions',$linkParentCTTag.attr( 'data-ct-options' ))
-		
-		ctOptions = $linkParentCTTag.attr( 'data-ct-options' ) || config.defaultCtOptions;
+		ctTitle = $link.attr( 'data-subpagenavigation-title' );
 
+		ctOptions = $linkParentCTTag.attr( 'data-subpagenavigation-options' ) || config.defaultCtOptions;
 
-		console.log('ctOptions',ctOptions)
-
-
-		// Mode and options have defaults or fallbacks, title does not.
-		// Don't make a request if there is no title.
+		console.log('ctTitle', ctTitle)
+		console.log('options', ctOptions)
 		if ( !ctTitle ) {
 			error();
 			return;
 		}
-		
-		console.log('ctTitle', ctTitle)
-		console.log('options', ctOptions)
 
 		new mw.Api().get( {
 			action: 'subpagenavigation-tree',
-			category: ctTitle,
+			title: ctTitle,
 			options: ctOptions,
 			uselang: mw.config.get( 'wgUserLanguage' ),
 			formatversion: 2
@@ -186,7 +167,7 @@ config = {defaultCtOptions: {} };
 			data = data['subpagenavigation-tree'].html;
 
 			if ( data === '' ) {
-				$data = $( '<i>' ).addClass( 'CategoryTreeNotice' )
+				$data = $( '<i>' ).addClass( 'SubpageNavigationTreeNotice' )
 					// eslint-disable-next-line mediawiki/msg-doc
 					.text( mw.msg( {
 						0: 'subpagenavigation-tree-no-subcategories',
@@ -202,18 +183,8 @@ config = {defaultCtOptions: {} };
 		} ).fail( error );
 	};
 
-	// Register click events
-	// mw.hook( 'wikipage.content' ).add( attachHandler );
-
-	// Attach click handler for categories.
-	// This is needed when wgCategoryTreeHijackPageCategories is enabled.
-	mw.hook( 'wikipage.categories' ).add( attachHandler );
-
 	$( function () {
-		// Attach click handler for sidebar
 		// eslint-disable-next-line no-jquery/no-global-selector
-		// attachHandler( $( '#p-categorytree-portlet' ) );
-		
 		attachHandler( $( '#subpagenavigation-tree' ) );
 	} );
 	

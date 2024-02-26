@@ -1,27 +1,4 @@
-/**
- * Stylesheet for the CategoryTree extension.
- *
- * © 2006 Daniel Kinzler
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- * http://www.gnu.org/copyleft/gpl.html
- *
- * @file
- * @ingroup Extensions
- * @author Daniel Kinzler, brightbyte.de
- */
+/* @credits: https://www.mediawiki.org/wiki/Extension:CategoryTree */
 
 /* On the list of subcategories hide the normal list bullet */
 .client-js #mw-subcategories ul {
@@ -39,13 +16,13 @@
 	margin-right: 0.25em;
 }
 
-#mw-panel .portal .body .CategoryTreeTag {
+#mw-panel .portal .body .SubpageNavigationTreeTag {
 	margin: 0;
 	font-size: 0.75em;
 	line-height: 1.125em;
 }
 
-#mw-panel .portal .body .CategoryTreeItem {
+#mw-panel .portal .body .SubpageNavigationTreeItem {
 	padding: 0.25em 0;
 }
 
@@ -54,30 +31,24 @@
  * A category tree in the sidebar is in user interface language therefor
  * a flipped margin-left is the margin start side.
  */
-.CategoryTreeChildren {
+.SubpageNavigationTreeChildren {
 	margin-left: 1.25em;
 }
 
-/*
- * Category trees in the content are in content language and therefor
- * an unflipped margin-left or margin-right is the margin start side.
- * Use margin: 0 0 0 1.25em instead of margin-left: 1.25em here to
- * overwrite the flipped margin-left from above.
- */
 /* @noflip */
-.mw-content-ltr .CategoryTreeChildren,
-.mw-content-rtl .mw-content-ltr .CategoryTreeChildren {
+.mw-content-ltr .SubpageNavigationTreeChildren,
+.mw-content-rtl .mw-content-ltr .SubpageNavigationTreeChildren {
 	margin: 0 0 0 1.25em;
 }
 
 /* @noflip */
-.mw-content-rtl .CategoryTreeChildren,
-.mw-content-ltr .mw-content-rtl .CategoryTreeChildren {
+.mw-content-rtl .SubpageNavigationTreeChildren,
+.mw-content-ltr .mw-content-rtl .SubpageNavigationTreeChildren {
 	margin: 0 1.25em 0 0;
 }
 
-.CategoryTreeBullet,
-.CategoryTreeEmptyBullet {
+.SubpageNavigationTreeBullet,
+.SubpageNavigationTreeEmptyBullet {
 	cursor: default;
 	-webkit-user-select: none;
 	-moz-user-select: none;
@@ -85,39 +56,39 @@
 	user-select: none;
 }
 
-.CategoryTreeEmptyBullet {
+.SubpageNavigationTreeEmptyBullet {
 	color: #c0c0c0;
 }
 
-.CategoryTreeBullet a,
-.CategoryTreeBullet a:link,
-.CategoryTreeBullet a:active,
-.CategoryTreeBullet a:visited {
+.SubpageNavigationTreeBullet a,
+.SubpageNavigationTreeBullet a:link,
+.SubpageNavigationTreeBullet a:active,
+.SubpageNavigationTreeBullet a:visited {
 	text-decoration: none;
 	color: inherit;
 	speak: none;
 }
 
 /* Hide toggle buttons for clients without JavaScript */
-.client-nojs .CategoryTreeBullet,
-.client-nojs .CategoryTreeEmptyBullet {
+.client-nojs .SubpageNavigationTreeBullet,
+.client-nojs .SubpageNavigationTreeEmptyBullet {
 	display: none;
 }
 
-.CategoryTreeToggle {
+.SubpageNavigationTreeToggle {
 	color: #0645ad;
 }
 
-.CategoryTreeEmptyBullet,
-.CategoryTreeToggle,
-.CategoryTreePageBullet {
+.SubpageNavigationTreeEmptyBullet,
+.SubpageNavigationTreeToggle,
+.SubpageNavigationTreePageBullet {
 	display: inline-block;
 	width: 0;
 	height: 0;
 }
 
-.CategoryTreeEmptyBullet,
-.CategoryTreeToggle[ data-ct-state='collapsed' ] {
+.SubpageNavigationTreeEmptyBullet,
+.SubpageNavigationTreeToggle[ data-subpagenavigation-state='collapsed' ] {
 	border-top: 5px solid transparent;
 	border-left: 10px solid;
 	border-bottom: 5px solid transparent;
@@ -125,56 +96,56 @@
 }
 
 /* @noflip */
-.mw-content-ltr .CategoryTreeEmptyBullet,
-.mw-content-ltr .CategoryTreeToggle[ data-ct-state='collapsed' ],
-.mw-content-rtl .mw-content-ltr .CategoryTreeEmptyBullet,
-.mw-content-rtl .mw-content-ltr .CategoryTreeToggle[ data-ct-state='collapsed' ] {
+.mw-content-ltr .SubpageNavigationTreeEmptyBullet,
+.mw-content-ltr .SubpageNavigationTreeToggle[ data-subpagenavigation-state='collapsed' ],
+.mw-content-rtl .mw-content-ltr .SubpageNavigationTreeEmptyBullet,
+.mw-content-rtl .mw-content-ltr .SubpageNavigationTreeToggle[ data-subpagenavigation-state='collapsed' ] {
 	border-left: 10px solid;
 	border-right: 0 none;
 }
 
 /* @noflip */
-.mw-content-rtl .CategoryTreeEmptyBullet,
-.mw-content-rtl .CategoryTreeToggle[ data-ct-state='collapsed' ],
-.mw-content-ltr .mw-content-rtl .CategoryTreeEmptyBullet,
-.mw-content-ltr .mw-content-rtl .CategoryTreeToggle[ data-ct-state='collapsed' ] {
+.mw-content-rtl .SubpageNavigationTreeEmptyBullet,
+.mw-content-rtl .SubpageNavigationTreeToggle[ data-subpagenavigation-state='collapsed' ],
+.mw-content-ltr .mw-content-rtl .SubpageNavigationTreeEmptyBullet,
+.mw-content-ltr .mw-content-rtl .SubpageNavigationTreeToggle[ data-subpagenavigation-state='collapsed' ] {
 	border-right: 10px solid;
 	border-left: 0 none;
 }
 
-.CategoryTreeToggle[ data-ct-state='expanded' ] {
+.SubpageNavigationTreeToggle[ data-subpagenavigation-state='expanded' ] {
 	border-left: 5px solid transparent;
 	border-right: 5px solid transparent;
 	border-top: 10px solid;
 }
 
-.CategoryTreePageBullet {
+.SubpageNavigationTreePageBullet {
 	border-left: 10px solid transparent;
 }
 
-.CategoryTreeLabelPage {
+.SubpageNavigationTreeLabelPage {
 	font-style: italic;
 }
 
-.CategoryTreeParents {
+.SubpageNavigationTreeParents {
 	margin-top: 1.5ex;
 	font-style: italic;
 }
 
-.CategoryTreeTag {
+.SubpageNavigationTreeTag {
 	margin-top: 0.5ex;
 	margin-bottom: 0.5ex;
 }
 
-.CategoryTreeResult {
+.SubpageNavigationTreeResult {
 	margin-top: 1.5ex;
 }
 
-.CategoryTreeNotice {
+.SubpageNavigationTreeNotice {
 	font-style: italic;
 }
 
-.CategoryTreeSearch {
+.SubpageNavigationTreeSearch {
 	font-style: italic;
 	color: #8b0000;
 	font-weight: bold;

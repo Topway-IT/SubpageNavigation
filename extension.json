@@ -75,11 +75,17 @@
 				"subpagenavigation-jsmodule-outdated-version"
 			]
 		},
-		"ext.SubpageNavigation.tree": {
+		"ext.SubpageNavigation.styles": {
+			"targets": [
+				"desktop",
+				"mobile"
+			],
 			"styles": [
 				"Tree/tree.styles.css",
-				"Tree/tree.css"				
-			],
+				"Tree/tree.css"			
+			]			
+		},
+		"ext.SubpageNavigation.tree": {
 			"packageFiles": [
 				"Tree/tree.js",
 				{
@@ -109,79 +115,21 @@
 		}
 	},
 	"config": {
-		"SubpageNavigationMaxChildren": {
-			"value": 200
+		"SubpageNavigationShowTree": {
+				"value": true
 		},
-		"SubpageNavigationAllowTag": {
-			"value": true
+		"SubpageNavigationShowCount": {
+				"value": true
+		},
+		"SubpageNavigationTreeLimit": {
+				"value": 30
 		},
 		"SubpageNavigationDisableCache": {
 			"value": 21600
 		},
-		"SubpageNavigationMaxDepth": {
-			"value": {
-				"10": 1,
-				"20": 1,
-				"0": 2
-			},
-			"merge_strategy": "array_plus"
-		},
-		"SubpageNavigationSidebarRoot": {
-			"value": null
-		},
-		"SubpageNavigationHijackPageCategories": {
-			"value": false
-		},
-		"SubpageNavigationUseCategoryTable": {
-			"value": true
-		},
-		"SubpageNavigationOmitNamespace": {
-			"value": 20
-		},
-		"SubpageNavigationDefaultMode": {
-			"value": 0
-		},
 		"SubpageNavigationDefaultOptions": {
 			"value": {
-				"mode": null,
-				"hideprefix": null,
-				"showcount": false,
-				"namespaces": false,
-				"notranslations": false
-			}
-		},
-		"SubpageNavigationCategoryPageMode": {
-			"value": 0
-		},
-		"SubpageNavigationCategoryPageOptions": {
-			"value": {
-				"mode": null,
 				"showcount": true
-			}
-		},
-		"SubpageNavigationSpecialPageOptions": {
-			"value": {
-				"showcount": true
-			}
-		},
-		"SubpageNavigationSidebarOptions": {
-			"value": {
-				"mode": 0,
-				"hideprefix": 20,
-				"showcount": false,
-				"hideroot": true,
-				"namespaces": false,
-				"depth": 1
-			}
-		},
-		"SubpageNavigationPageCategoryOptions": {
-			"value": {
-				"mode": 100,
-				"hideprefix": 20,
-				"showcount": false,
-				"hideroot": false,
-				"namespaces": false,
-				"depth": 0
 			}
 		}
 	},

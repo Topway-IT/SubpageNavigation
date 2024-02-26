@@ -18,10 +18,11 @@
  * @file
  * @ingroup extensions
  * @author thomas-topway-it <support@topway.it>
- * @copyright Copyright ©2023, https://wikisphere.org
+ * @copyright Copyright ©2023-2024, https://wikisphere.org
  */
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Extension\SubpageNavigation\Tree as SubpageNavigationTree;
 
 class SubpageNavigationHooks {
 
@@ -29,8 +30,7 @@ class SubpageNavigationHooks {
 	 * @param MediaWikiServices $services
 	 * @return void
 	 */
-	public static function onMediaWikiServices( $services ) {
-	}
+	public static function onMediaWikiServices( $services ) { }
 
 	public static function onRegistration() {
 		// $GLOBALS['wgwgNamespacesWithSubpages'][NS_MAIN] = false;
@@ -100,8 +100,6 @@ class SubpageNavigationHooks {
 		// used by WikidataPageBanner to place the banner
 		// $outputPage->addSubtitle( 'addSubtitle' );
 
-		$outputPage->addModules( [ 'ext.SubpageNavigationSubpages' ] );
-
 		\SubpageNavigation::addHeaditem( $outputPage, [
 			[ 'stylesheet', $wgResourceBasePath . '/extensions/SubpageNavigation/resources/style.css' ],
 		] );
@@ -110,11 +108,15 @@ class SubpageNavigationHooks {
 			return;
 		}
 
+		if ( !empty( $GLOBALS['wgSubpageNavigationShowTree'] ) ) {
+			SubpageNavigationTree::setHeaders( $outputPage );
+		}
+
 		if ( !empty( $_REQUEST['action'] ) && $_REQUEST['action'] !== 'view' ) {
 			return;
 		}
 
-$outputPage->addModules( 'ext.SubpageNavigation.tree' );
+		$outputPage->addModules( [ 'ext.SubpageNavigationSubpages' ] );
 
 		// *** this is rendered after than onArticleViewHeader
 		$outputPage->prependHTML( \SubpageNavigation::getSubpageHeader( $title ) );
@@ -128,160 +130,82 @@ $outputPage->addModules( 'ext.SubpageNavigation.tree' );
 		}
 	}
 
-
-	public static function tocList( $toc, Language $lang = null ) {
-		$lang ??= RequestContext::getMain()->getLanguage();
-
-		$title = 'Tree';	// wfMessage( 'toc' )->inLanguage( $lang )->escaped();
-		
-			
-			
-
-		return '<div id="toc" style="margin:auto" class="toc" role="navigation" aria-labelledby="mw-toc-heading">'
-			// . Html::element( 'input', [
-			//	'type' => 'checkbox',
-			//	'role' => 'button',
-			//	'id' => 'toctogglecheckbox',
-			//	'class' => 'toctogglecheckbox',
-			//	'style' => 'display:none',
-			//] )
-			
-			. '<input type="checkbox" role="button" id="toctogglecheckbox"
-				class="toctogglecheckbox" style="display:none" />'
-			
-			
-			. Html::openElement( 'div', [
-				'class' => 'toctitle',
-				'lang' => $lang->getHtmlCode(),
-				'dir' => $lang->getDir(),
-			] )
-			. '<h2 id="mw-toc-heading" style="position:relative;top:auto">' . $title . '</h2>'
-			. '<span class="toctogglespan">'
-			. Html::label( '', 'toctogglecheckbox', [
-				'class' => 'toctogglelabel',
-			] )
-			. '</span>'
-			. '</div>'
-			. $toc
-			. "</div>";
-	}
-	
-	
-
 	/**
 	 * @param OutputPage $out
 	 *
 	 * @return true
 	 */
-	public static function onAfterFinalPageOutput( OutputPage $out ) {
-	
-		
-//	return true;
-	$context = RequestContext::getMain();
+	public static function onAfterFinalPageOutput( OutputPage $output ) {
+		if ( empty( $GLOBALS['wgSubpageNavigationShowTree'] ) ) {
+			return;
+		}
+
+		$title = $output->getTitle();
+
+		if ( $title->isSpecialPage() ) {
+			return;
+		}
 	
 		$html = ob_get_clean();
-		
-		
+		$dom = new DOMDocument();
+		libxml_use_internal_errors( true );
+		$dom->loadHTML( $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
+		$parentDiv = $dom->getElementById( 'mw-panel' );
 
-// Create a new DOMDocument
-$dom = new DOMDocument();
+		if ( !$parentDiv ) {
+			$out = $dom->saveHTML();
+			ob_start();
+			echo $out;
+			return true;
+		}
 
-libxml_use_internal_errors(true); // Enable internal error handling
+		$context = RequestContext::getMain();
 
-// Load HTML with options to handle HTML5 tags
-$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+		$options = [];
+		$tree = new SubpageNavigationTree( $options );
+		$treeHtml = $tree->getTree( $output );
 
+		// this creates a MW's TOC like toggle
+		$treeHtml = SubpageNavigationTree::tocList( $treeHtml );
 
-// Find the div by ID
-$parentDiv = $dom->getElementById('mw-panel');
+		// *** the following is an hack for the Vector skin to
+		// add the tree above the menu items, without using javascript
 
-// Check if the div with the specified ID exists
-if (!$parentDiv) {
-	
-    // Output the modified HTML
-    $out = $dom->saveHTML();
-		
-	
-		
-		ob_start();
-		echo $out;
-		
+		$children = $parentDiv->childNodes;
 
-		return true;
-}
-
-
-	$children = $parentDiv->childNodes;
-
-    if ($children->length > 1) {
-        $wrapperDiv = $dom->createElement('div');
-        
-        $wrapperDiv->setAttribute('id', 'subpagenavigation-mw-portlets');
+		if ( $children->length > 1 ) {
+        	$wrapperDiv = $dom->createElement( 'div' );
+        	$wrapperDiv->setAttribute( 'id', 'subpagenavigation-mw-portlets' );
       
+			for ( $i = 2; $i < $children->length; $i++ ) {
+            	$wrapperDiv->appendChild( $children->item( $i )->cloneNode( true ) );
+			}
 
-        // Iterate through the children starting from the second one
-        for ($i = 2; $i < $children->length; $i++) {
-            // Append each child to the wrapper div
-            $wrapperDiv->appendChild($children->item($i)->cloneNode(true));
-        }
+			while ( $parentDiv->childNodes->length > 2 ) {
+				$parentDiv->removeChild( $parentDiv->childNodes->item( 2 ) );
+			}
 
-        // Replace the existing children with the wrapper div
-while ($parentDiv->childNodes->length > 2) {
-    $parentDiv->removeChild($parentDiv->childNodes->item(2));
-}
-       // $parentDiv->appendChild($wrapperDiv);
-        
-        
-        $tree = \SubpageNavigation::getTree( $context->getTitle() );
-		
-	 $newHtml =	self::tocList( $tree );
-	 
-        
-    $fragment = $dom->createDocumentFragment();
-    $fragment->appendXML($newHtml);
+			$fragment = $dom->createDocumentFragment();
+			$fragment->appendXML( $treeHtml );
+        	$treeContainer = $dom->createElement( 'div' );
+			$treeContainer->setAttribute( 'id', 'subpagenavigation-tree' );
+			$treeContainer->appendChild( $fragment );
 
-    // Append the document fragment to the parent div
-    
-    
-        $tree = $dom->createElement('div'); 
-      //  $tree->setAttribute('style', 'display: none;');
-        
-        
-        
-        
-        $tree->setAttribute('id', 'subpagenavigation-tree');
-        
-    $tree->appendChild($fragment);
-    
-    
-    
-        $container = $dom->createElement('div');
-        $container->setAttribute('id', 'subpagenavigation-tree-container');
-        
-    $container->appendChild($tree);
-    $container->appendChild($wrapperDiv);
-        
-        
-        
-    $parentDiv->appendChild($container);
-    
-    
-    }
+			$container = $dom->createElement( 'div' );
+			$container->setAttribute( 'id', 'subpagenavigation-tree-container' );
 
-    // Output the modified HTML
-    $out = $dom->saveHTML();
-		
-	
-		
+			$container->appendChild( $treeContainer );
+			$container->appendChild( $wrapperDiv );
+
+			$parentDiv->appendChild( $container );
+		}
+
+		$out = $dom->saveHTML();
 		ob_start();
 		echo $out;
-		
-
 		return true;
 	}
-	
-	
-	
+
 	/**
 	 * @param Skin $skin
 	 * @param array &$sidebar

@@ -84,7 +84,15 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 		}
 
 		$this->prefix = $par . '/';
-		$this->namespace = $title ? $title->getNamespace() : NS_MAIN;
+		
+		if ( $title ) {
+			$this->namespace = $title->getNamespace();
+		} elseif ( !empty( $_GET[ 'namespace' ] ) ) {
+			$this->namespace = (int)$_GET[ 'namespace' ];
+		} else {
+			$this->namespace = NS_MAIN;
+		}
+
 		$this->LinkRenderer = $this->getLinkRenderer();
 
 		if ( $this->isCached() && !$this->isCacheable() ) {

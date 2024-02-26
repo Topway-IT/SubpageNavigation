@@ -13,21 +13,28 @@ use WANObjectCache;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
- * This program is free software; you can redistribute it and/or modify
+ * This file is part of the MediaWiki extension SubpageNavigation.
+ *
+ * SubpageNavigation is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 2 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * SubpageNavigation is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- * http://www.gnu.org/copyleft/gpl.html
+ * You should have received a copy of the GNU General Public License
+ * along with SubpageNavigation.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @file
+ * @ingroup extensions
+ * @author thomas-topway-it <support@topway.it>
+ * @copyright Copyright ©2023, https://wikisphere.org
  */
+
+// @credits: https://www.mediawiki.org/wiki/Extension:CategoryTree
 
 class Api extends ApiBase {
 	/** @var ConfigFactory */
@@ -64,58 +71,44 @@ class Api extends ApiBase {
 	 */
 	public function execute() {
 		$params = $this->extractRequestParams();
+		$options = $this->extractOptions( $params );
+		$title = Tree::makeTitle( $params['title'], (int)$options['namespace'] );
+
+		if ( !$title || $title->isExternal() ) {
+			$this->dieWithError( [ 'apierror-invalidtitle', wfEscapeWikiText( $params['title'] ) ] );
+		}
+
+		$tree = new Tree( $options );
+		$config = $this->configFactory->makeConfig( 'subpagenavigation' );
+
+		$html = $this->getHTML( $tree, $title, $config );
+		// $html = trim( $ct->renderChildren( $title, true ) );
+
+		$this->getMain()->setCacheMode( 'public' );
+		$this->getResult()->addContentValue( $this->getModuleName(), 'html', $html );
+	}
+	
+	private function extractOptions( $params ) {
 		$options = [];
 		if ( isset( $params['options'] ) ) {
 			$options = FormatJson::decode( $params['options'] );
 			if ( !is_object( $options ) ) {
-				$this->dieWithError( 'apierror-categorytree-invalidjson', 'invalidjson' );
+				$this->dieWithError( 'apierror-subpagenavigation-invalidjson', 'invalidjson' );
 			}
 			$options = get_object_vars( $options );
 		}
-
-
-
-
-		$title = Tree::makeTitle( $params['category'], (int)$options['namespace'] );
-		if ( !$title || $title->isExternal() ) {
-			$this->dieWithError( [ 'apierror-invalidtitle', wfEscapeWikiText( $params['category'] ) ] );
-		}
-
-		// $depth = isset( $options['depth'] ) ? (int)$options['depth'] : 1;
-
-		$ct = new Tree( $options );
-		$depth = Tree::capDepth( $ct->getOption( 'mode' ), $depth );
-		$ctConfig = $this->configFactory->makeConfig( 'subpagenavigation' );
-		
-		$html = $this->getHTML( $ct, $title, $ctConfig );
-		
-		// $html = trim( $ct->renderChildren( $title, true ) );
-
-		$this->getMain()->setCacheMode( 'public' );
-
-		$this->getResult()->addContentValue( $this->getModuleName(), 'html', $html );
+		return $options;
 	}
 
 	/**
 	 * @param string $condition
-	 *
 	 * @return bool|null|string
 	 */
 	public function getConditionalRequestData( $condition ) {
 		if ( $condition === 'last-modified' ) {
 			$params = $this->extractRequestParams();
-			
-				if ( isset( $params['options'] ) ) {
-			$options = FormatJson::decode( $params['options'] );
-			if ( !is_object( $options ) ) {
-				$this->dieWithError( 'apierror-categorytree-invalidjson', 'invalidjson' );
-			}
-			$options = get_object_vars( $options );
-		}
-			
-			
-			
-			$title = Tree::makeTitle( $params['category'], (int)$options['namespace'] );
+			$options = $this->extractOptions( $params );
+			$title = Tree::makeTitle( $params['title'], (int)$options['namespace'] );
 			return wfGetDB( DB_REPLICA )->selectField( 'page', 'page_touched',
 				[
 					'page_namespace' => $title->getNamespace(),
@@ -127,15 +120,12 @@ class Api extends ApiBase {
 	}
 
 	/**
-	 * Get category tree HTML for the given tree, title, depth and config
-	 *
-	 * @param CategoryTree $ct
+	 * @param Tree $tree
 	 * @param Title $title
-	 * @param int $depth
-	 * @param Config $ctConfig Config for CategoryTree
+	 * @param Config $config
 	 * @return string HTML
 	 */
-	private function getHTML( Tree $ct, Title $title, Config $ctConfig ) {
+	private function getHTML( Tree $tree, Title $title, Config $config ) {
 		$langConv = $this->languageConverterFactory->getLanguageConverter();
 
 		return $this->wanCache->getWithSetCallback(
@@ -144,16 +134,15 @@ class Api extends ApiBase {
 				md5( $title->getDBkey() ),
 				$this->getLanguage()->getCode(),
 				$langConv->getExtraHashOptions(),
-				$ctConfig->get( 'RenderHashAppend' )
+				$config->get( 'RenderHashAppend' )
 			),
 			$this->wanCache::TTL_DAY,
-			static function () use ( $ct, $title ) {
-				return trim( $ct->renderChildren( $title, true ) );
+			static function () use ( $tree, $title ) {
+				return trim( $tree->renderChildren( $title, true ) );
 			},
 			[
 				'touchedCallback' => function () {
 					$timestamp = $this->getConditionalRequestData( 'last-modified' );
-
 					return $timestamp ? wfTimestamp( TS_UNIX, $timestamp ) : null;
 				}
 			]
@@ -165,7 +154,7 @@ class Api extends ApiBase {
 	 */
 	public function getAllowedParams() {
 		return [
-			'category' => [
+			'title' => [
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => true,
 			],
