@@ -426,6 +426,9 @@ return;
 	public static function getSubpages( $prefix, $namespace, $limit = null ) {
 		$dbr = wfGetDB( DB_REPLICA );
 		$sql = \SubpageNavigation::subpagesSQL( $dbr, $prefix, $namespace, self::MODE_FILESYSTEM );
+		
+		$limit = 100;
+		
 		if ( $limit ) {
 			$offset = 0;
 			$sql = $dbr->limitResult( $sql, $limit, $offset );
@@ -562,7 +565,10 @@ if ( $api ) {
 $label = substr( $label, strlen( $parentTitle->getText() ) + 1);
 }
 
-		$link = $this->linkRenderer->makeLink( $title, $label );
+
+// '​'
+
+		$link = $this->linkRenderer->makeLink( $title, implode( '​', preg_split( '//', $label ) ) );
 
 		// $count = false;
 		$s = '';
@@ -625,6 +631,7 @@ $title_ = RequestContext::getMain()->getTitle();
 			$attr['class'] = 'CategoryTreePageBullet';
 		}
 		$s .= Html::rawElement( 'span', $attr, $bullet ) . ' ';
+
 
 		$s .= $link;
 		

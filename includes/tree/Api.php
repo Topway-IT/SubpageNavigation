@@ -81,16 +81,15 @@ class Api extends ApiBase {
 			$this->dieWithError( [ 'apierror-invalidtitle', wfEscapeWikiText( $params['category'] ) ] );
 		}
 
-		$depth = isset( $options['depth'] ) ? (int)$options['depth'] : 1;
+		// $depth = isset( $options['depth'] ) ? (int)$options['depth'] : 1;
 
 		$ct = new Tree( $options );
 		$depth = Tree::capDepth( $ct->getOption( 'mode' ), $depth );
 		$ctConfig = $this->configFactory->makeConfig( 'subpagenavigation' );
-		// $html = $this->getHTML( $ct, $title, $depth, $ctConfig );
 		
-		// $html = $this->getHTML( $ct, $title, true, $ctConfig );
+		$html = $this->getHTML( $ct, $title, $ctConfig );
 		
-		$html = trim( $ct->renderChildren( $title, true ) );
+		// $html = trim( $ct->renderChildren( $title, true ) );
 
 		$this->getMain()->setCacheMode( 'public' );
 
@@ -105,10 +104,21 @@ class Api extends ApiBase {
 	public function getConditionalRequestData( $condition ) {
 		if ( $condition === 'last-modified' ) {
 			$params = $this->extractRequestParams();
-			$title = Tree::makeTitle( $params['category'] );
+			
+				if ( isset( $params['options'] ) ) {
+			$options = FormatJson::decode( $params['options'] );
+			if ( !is_object( $options ) ) {
+				$this->dieWithError( 'apierror-categorytree-invalidjson', 'invalidjson' );
+			}
+			$options = get_object_vars( $options );
+		}
+			
+			
+			
+			$title = Tree::makeTitle( $params['category'], (int)$options['namespace'] );
 			return wfGetDB( DB_REPLICA )->selectField( 'page', 'page_touched',
 				[
-					'page_namespace' => NS_CATEGORY,
+					'page_namespace' => $title->getNamespace(),
 					'page_title' => $title->getDBkey(),
 				],
 				__METHOD__
@@ -125,21 +135,20 @@ class Api extends ApiBase {
 	 * @param Config $ctConfig Config for CategoryTree
 	 * @return string HTML
 	 */
-	private function getHTML( Tree $ct, Title $title, $depth, Config $ctConfig ) {
+	private function getHTML( Tree $ct, Title $title, Config $ctConfig ) {
 		$langConv = $this->languageConverterFactory->getLanguageConverter();
 
 		return $this->wanCache->getWithSetCallback(
 			$this->wanCache->makeKey(
-				'categorytree-html-ajax',
+				'subpagenavigation-tree-html-ajax',
 				md5( $title->getDBkey() ),
-				md5( $ct->getOptionsAsCacheKey( $depth ) ),
 				$this->getLanguage()->getCode(),
 				$langConv->getExtraHashOptions(),
 				$ctConfig->get( 'RenderHashAppend' )
 			),
 			$this->wanCache::TTL_DAY,
-			static function () use ( $ct, $title, $depth ) {
-				return trim( $ct->renderChildren( $title, $depth ) );
+			static function () use ( $ct, $title ) {
+				return trim( $ct->renderChildren( $title, true ) );
 			},
 			[
 				'touchedCallback' => function () {

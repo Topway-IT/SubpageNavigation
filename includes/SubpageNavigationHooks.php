@@ -175,6 +175,7 @@ $outputPage->addModules( 'ext.SubpageNavigation.tree' );
 	 */
 	public static function onAfterFinalPageOutput( OutputPage $out ) {
 	
+		
 //	return true;
 	$context = RequestContext::getMain();
 	
@@ -195,7 +196,21 @@ $dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 $parentDiv = $dom->getElementById('mw-panel');
 
 // Check if the div with the specified ID exists
-if ($parentDiv) {
+if (!$parentDiv) {
+	
+    // Output the modified HTML
+    $out = $dom->saveHTML();
+		
+	
+		
+		ob_start();
+		echo $out;
+		
+
+		return true;
+}
+
+
 	$children = $parentDiv->childNodes;
 
     if ($children->length > 1) {
@@ -251,15 +266,12 @@ while ($parentDiv->childNodes->length > 2) {
     $parentDiv->appendChild($container);
     
     
-    } else {
     }
 
     // Output the modified HTML
     $out = $dom->saveHTML();
-}
 		
-		
-		$out .= '';
+	
 		
 		ob_start();
 		echo $out;

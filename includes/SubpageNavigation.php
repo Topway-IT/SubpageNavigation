@@ -388,8 +388,8 @@ $argv = [];
 	 * @return string|\ResultWrapper
 	 */
 	public static function subpagesSQL( $dbr, $prefix, $namespace, $mode ) {
-	
 		$cond = 'page_namespace = ' . $namespace
+			 . ' AND page_is_redirect = 0'
 			 . ( $prefix != '/' ? ' AND page_title LIKE ' . $dbr->addQuotes( $prefix . '%' )
 				: '' );
 
