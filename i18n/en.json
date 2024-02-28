@@ -2,6 +2,8 @@
 	"@metadata": {
 		"authors": []
 	},
+	
+	"subpagenavigation-tree": "Subpage navigation",
 	"subpagenavigation-extension-desc": "Shows direct children of current page in article navigation",
 	"specialpages-group-subpagenavigation": "SubpageNavigation",
 	"apihelp-subpagenavigation-check-latest-version-summary": "subpagenavigation check latest version",

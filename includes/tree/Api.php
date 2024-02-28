@@ -8,6 +8,7 @@ use Config;
 use ConfigFactory;
 use FormatJson;
 use MediaWiki\Languages\LanguageConverterFactory;
+use ObjectCache;
 use Title;
 use WANObjectCache;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -46,6 +47,9 @@ class Api extends ApiBase {
 	/** @var WANObjectCache */
 	private $wanCache;
 
+	/** @var srvCache */
+	private $srvCache;
+
 	/**
 	 * @param ApiMain $main
 	 * @param string $action
@@ -77,6 +81,8 @@ class Api extends ApiBase {
 		if ( !$title || $title->isExternal() ) {
 			$this->dieWithError( [ 'apierror-invalidtitle', wfEscapeWikiText( $params['title'] ) ] );
 		}
+
+		$this->srvCache = ObjectCache::getLocalServerInstance( 'hash' );
 
 		$tree = new Tree( $options );
 		$config = $this->configFactory->makeConfig( 'subpagenavigation' );
@@ -127,6 +133,8 @@ class Api extends ApiBase {
 	 */
 	private function getHTML( Tree $tree, Title $title, Config $config ) {
 		$langConv = $this->languageConverterFactory->getLanguageConverter();
+		
+		
 
 		return $this->wanCache->getWithSetCallback(
 			$this->wanCache->makeKey(

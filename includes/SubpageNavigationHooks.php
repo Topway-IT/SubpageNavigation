@@ -153,13 +153,35 @@ class SubpageNavigationHooks {
 		$parentDiv = $dom->getElementById( 'mw-panel' );
 
 		if ( !$parentDiv ) {
+			$parentDiv = $dom->getElementById( 'chameleon-subpagenavigation-tree' );
+
+			if ( $parentDiv ) {
+				$options = [];
+				$tree = new SubpageNavigationTree( $options );
+				$treeHtml = $tree->getTree( $output );
+		
+				$fragment = $dom->createDocumentFragment();
+				$fragment->appendXML( $treeHtml );
+        		$treeContainer = $dom->createElement( 'div' );
+				$treeContainer->setAttribute( 'id', 'subpagenavigation-tree' );
+				$treeContainer->appendChild( $fragment );
+				$container = $dom->createElement( 'div' );
+				$container->setAttribute( 'id', 'subpagenavigation-tree-container' );
+				$container->appendChild( $treeContainer );
+				
+				$parentDiv->appendChild( $container );
+			
+				$out = $dom->saveHTML();
+				ob_start();
+				echo $out;
+				return true;
+			}
+
 			$out = $dom->saveHTML();
 			ob_start();
 			echo $out;
 			return true;
 		}
-
-		$context = RequestContext::getMain();
 
 		$options = [];
 		$tree = new SubpageNavigationTree( $options );
