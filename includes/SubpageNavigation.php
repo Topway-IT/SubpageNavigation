@@ -21,6 +21,7 @@
  * @copyright Copyright ©2023, https://wikisphere.org
  */
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Extension\SubpageNavigation\Tree as SubpageNavigationTree;
 
 class SubpageNavigation {
 	const MODE_DEFAULT = 1;
@@ -424,6 +425,8 @@ class SubpageNavigation {
 				: '' );
 
 		$pageTable = $dbr->tableName( 'page' );
+		
+		// @FIXME use the new MediaWiko's SQL api if possible
 
 		switch ( $mode ) {
 			case self::MODE_COUNT:
@@ -520,4 +523,19 @@ WHERE ( t2.page_title IS NULL OR t1.page_title = t2.page_title )
 
 		} // switch
 	}
+
+	/**
+	 * @param Output
+	 * @return string
+	 */
+	public static function getTreeHtml( $output ) {
+		$options = [];
+		$tree = new SubpageNavigationTree( $options );
+		$treeHtml = $tree->getTree( $output );
+
+		// this creates a MW's TOC like toggle
+		return '<div id="subpagenavigation-tree" class="SubpageNavigationTreeContainer">'
+			. SubpageNavigationTree::tocList( $treeHtml ) . '</div>';			
+	}
+
 }

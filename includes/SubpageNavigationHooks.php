@@ -75,6 +75,44 @@ class SubpageNavigationHooks {
 	}
 
 	/**
+	 * @param Skin $skin
+	 * @param array &$sidebar
+	 */
+	public static function onSkinBuildSidebar( $skin, &$sidebar ) {
+		if ( empty( $GLOBALS['wgSubpageNavigationShowTree'] ) ) {
+			return;
+		}
+
+		$title = $skin->getTitle();
+
+		if ( $title->isSpecialPage() ) {
+			return;
+		}
+
+		// *** place on top
+		$sidebar = array_merge(
+			[ 'subpagenavigation-portlet' => [] ],
+			$sidebar
+		);
+	}
+
+	/**
+	 * Hook implementation for injecting a category tree link into the sidebar.
+	 * Only does anything if $wgCategoryTreeSidebarRoot is set to a category name.
+	 * @param Skin $skin
+	 * @param string $portlet
+	 * @param string &$html
+	 */
+	public static function onSkinAfterPortlet( $skin, $portlet, &$html ) {
+		if ( $portlet === 'subpagenavigation-portlet' ) {
+			$html = \SubpageNavigation::getTreeHtml( $skin->getOutput() );
+		}
+	}
+
+	public static function onSkinTemplateNavigation_Universal( SkinTemplate $skinTemplate, array &$links ) {
+	}
+
+	/**
 	 * @param OutputPage $outputPage
 	 * @param Skin $skin
 	 * @return void
@@ -128,104 +166,6 @@ class SubpageNavigationHooks {
 				$outputPage->setPageTitle( $current );
 			}
 		}
-	}
-
-	/**
-	 * @param OutputPage $out
-	 *
-	 * @return true
-	 */
-	public static function onAfterFinalPageOutput( OutputPage $output ) {
-		if ( empty( $GLOBALS['wgSubpageNavigationShowTree'] ) ) {
-			return;
-		}
-
-		$title = $output->getTitle();
-
-		if ( $title->isSpecialPage() ) {
-			return;
-		}
-	
-		$html = ob_get_clean();
-		$dom = new DOMDocument();
-		libxml_use_internal_errors( true );
-		$dom->loadHTML( $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
-		$parentDiv = $dom->getElementById( 'mw-panel' );
-
-		if ( !$parentDiv ) {
-			$parentDiv = $dom->getElementById( 'chameleon-subpagenavigation-tree' );
-
-			if ( $parentDiv ) {
-				$options = [];
-				$tree = new SubpageNavigationTree( $options );
-				$treeHtml = $tree->getTree( $output );
-		
-				$fragment = $dom->createDocumentFragment();
-				$fragment->appendXML( $treeHtml );
-        		$treeContainer = $dom->createElement( 'div' );
-				$treeContainer->setAttribute( 'id', 'subpagenavigation-tree' );
-				$treeContainer->appendChild( $fragment );
-				$container = $dom->createElement( 'div' );
-				$container->setAttribute( 'id', 'subpagenavigation-tree-container' );
-				$container->appendChild( $treeContainer );
-				
-				$parentDiv->appendChild( $container );
-			
-				$out = $dom->saveHTML();
-				ob_start();
-				echo $out;
-				return true;
-			}
-
-			$out = $dom->saveHTML();
-			ob_start();
-			echo $out;
-			return true;
-		}
-
-		$options = [];
-		$tree = new SubpageNavigationTree( $options );
-		$treeHtml = $tree->getTree( $output );
-
-		// this creates a MW's TOC like toggle
-		$treeHtml = SubpageNavigationTree::tocList( $treeHtml );
-
-		// *** the following is an hack for the Vector skin to
-		// add the tree above the menu items, without using javascript
-
-		$children = $parentDiv->childNodes;
-
-		if ( $children->length > 1 ) {
-        	$wrapperDiv = $dom->createElement( 'div' );
-        	$wrapperDiv->setAttribute( 'id', 'subpagenavigation-mw-portlets' );
-      
-			for ( $i = 2; $i < $children->length; $i++ ) {
-            	$wrapperDiv->appendChild( $children->item( $i )->cloneNode( true ) );
-			}
-
-			while ( $parentDiv->childNodes->length > 2 ) {
-				$parentDiv->removeChild( $parentDiv->childNodes->item( 2 ) );
-			}
-
-			$fragment = $dom->createDocumentFragment();
-			$fragment->appendXML( $treeHtml );
-        	$treeContainer = $dom->createElement( 'div' );
-			$treeContainer->setAttribute( 'id', 'subpagenavigation-tree' );
-			$treeContainer->appendChild( $fragment );
-
-			$container = $dom->createElement( 'div' );
-			$container->setAttribute( 'id', 'subpagenavigation-tree-container' );
-
-			$container->appendChild( $treeContainer );
-			$container->appendChild( $wrapperDiv );
-
-			$parentDiv->appendChild( $container );
-		}
-
-		$out = $dom->saveHTML();
-		ob_start();
-		echo $out;
-		return true;
 	}
 
 	/**

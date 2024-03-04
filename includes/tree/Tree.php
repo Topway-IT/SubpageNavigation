@@ -117,7 +117,7 @@ class Tree {
 		// wfMessage( 'toc' )->inLanguage( $lang )->escaped();
 		$title = wfMessage( 'subpagenavigation-toc-title' )->inLanguage( $lang )->escaped();
 
-		return '<div id="toc" style="margin:auto" class="toc" role="navigation" aria-labelledby="mw-toc-heading">'
+		return '<div id="subpagenavigation-toc" style="margin:auto" class="toc" role="navigation" aria-labelledby="subpagenavigation-mw-toc-heading">'
 			// . Html::element( 'input', [
 			//	'type' => 'checkbox',
 			//	'role' => 'button',
@@ -125,16 +125,17 @@ class Tree {
 			//	'class' => 'toctogglecheckbox',
 			//	'style' => 'display:none',
 			//] )
-			. '<input type="checkbox" role="button" id="toctogglecheckbox"
+			. '<input type="checkbox" role="button" id="subpagenavigation-toctogglecheckbox"
 				class="toctogglecheckbox" style="display:none" />'
 			. Html::openElement( 'div', [
 				'class' => 'toctitle',
 				'lang' => $lang->getHtmlCode(),
 				'dir' => $lang->getDir(),
+				'style' => 'white-space:nowrap',
 			] )
-			. '<h2 id="mw-toc-heading" style="position:relative;top:auto">' . $title . '</h2>'
+			. '<h2 id="subpagenavigation-mw-toc-heading" style="position:relative;top:auto">' . $title . '</h2>'
 			. '<span class="toctogglespan">'
-			. Html::label( '', 'toctogglecheckbox', [
+			. Html::label( '', 'subpagenavigation-toctogglecheckbox', [
 				'class' => 'toctogglelabel',
 			] )
 			. '</span>'

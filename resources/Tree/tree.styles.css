@@ -1,11 +1,9 @@
 /* @credits: https://www.mediawiki.org/wiki/Extension:CategoryTree */
 
-/* On the list of subcategories hide the normal list bullet */
 .client-js #mw-subcategories ul {
 	list-style: none;
 }
 
-/* and reduce the margin on the margin start side. */
 /* @noflip */
 .client-js #mw-subcategories .mw-content-ltr ul {
 	margin-left: 0.25em;
@@ -26,11 +24,6 @@
 	padding: 0.25em 0;
 }
 
-/*
- * Indent the children on each level on margin start side.
- * A category tree in the sidebar is in user interface language therefor
- * a flipped margin-left is the margin start side.
- */
 .SubpageNavigationTreeChildren {
 	margin-left: 1.25em;
 }
@@ -69,7 +62,6 @@
 	speak: none;
 }
 
-/* Hide toggle buttons for clients without JavaScript */
 .client-nojs .SubpageNavigationTreeBullet,
 .client-nojs .SubpageNavigationTreeEmptyBullet {
 	display: none;

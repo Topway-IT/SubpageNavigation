@@ -180,10 +180,10 @@
 
 		toggleNode.addEventListener( 'change', function () {
 			hidden = !hidden;
-			mw.cookie.set( 'hidetoc', hidden ? '1' : null );
+			mw.cookie.set( 'subpagenavigation-hidetoc', hidden ? '1' : null );
 		} );
 
-		if ( mw.cookie.get( 'hidetoc' ) === '1' ) {
+		if ( mw.cookie.get( 'subpagenavigation-hidetoc' ) === '1' ) {
 			toggleNode.checked = true;
 			hidden = true;
 		}

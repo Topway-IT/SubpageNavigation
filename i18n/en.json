@@ -4,6 +4,7 @@
 	},
 	
 	"subpagenavigation-tree": "Subpage navigation",
+	"subpagenavigation-portlet": "",
 	"subpagenavigation-extension-desc": "Shows direct children of current page in article navigation",
 	"specialpages-group-subpagenavigation": "SubpageNavigation",
 	"apihelp-subpagenavigation-check-latest-version-summary": "subpagenavigation check latest version",
@@ -21,7 +22,7 @@
 	"subpagenavigation-browse-folders": "folders",
 	"subpagenavigation-browse-filesystem": "filesystem",
 
-	"subpagenavigation-toc-title": "Tree",
+	"subpagenavigation-toc-title": "Pages",
 	"subpagenavigation-tree-collapse": "collapse",
 	"subpagenavigation-tree-expand": "expand",
 	"subpagenavigation-tree-member-counts": "Contains {{PLURAL:$1|1 subpage|$1 subpages}}",

@@ -20,6 +20,7 @@
 	"AutoloadClasses": {
 		"SubpageNavigationHooks": "includes/SubpageNavigationHooks.php",
 		"SubpageNavigation": "includes/SubpageNavigation.php",
+		"Skins\\Chameleon\\Components\\SubpageNavigation": "includes/chameleon/component.php",
 		"SubpageNavigationApiCheckLatestVersion": "includes/api/SubpageNavigationApiCheckLatestVersion.php",
 		"SpecialSubpageNavigationBrowse": "includes/specials/SpecialSubpageNavigationBrowse.php"
 	},
@@ -34,7 +35,10 @@
 		"BeforePageDisplay": "SubpageNavigationHooks::onBeforePageDisplay",
 		"ArticleViewNavigation": "SubpageNavigationHooks::onArticleViewNavigation",
 		"SkinSubPageSubtitle": "SubpageNavigationHooks::onSkinSubPageSubtitle",
-		"AfterFinalPageOutput": "SubpageNavigationHooks::onAfterFinalPageOutput"
+		"AfterFinalPageOutput": "SubpageNavigationHooks::onAfterFinalPageOutput",
+		"SkinAfterPortlet": "SubpageNavigationHooks::onSkinAfterPortlet",
+		"SkinBuildSidebar": "SubpageNavigationHooks::onSkinBuildSidebar",
+		"SkinTemplateNavigation::Universal": "SubpageNavigationHooks::onSkinTemplateNavigation_Universal"
 	},
 	"ConfigRegistry": {
 		"subpagenavigation": "GlobalVarConfig::newInstance"
