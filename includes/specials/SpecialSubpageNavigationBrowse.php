@@ -245,7 +245,6 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 	protected function addNavigationLinks() {
 		$formattedNamespaces = MediaWikiServices::getInstance()
 			->getContentLanguage()->getFormattedNamespaces();
-			
 
 		$links = [];
 		foreach ( $formattedNamespaces as $mode => $name ) {
@@ -267,7 +266,6 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 		$linkStrNamespace = $this->msg( 'subpagenavigation-browse-topnav-namespace' )->parse() . " $linkStrNamespace";
 		$linkStrNamespace = Xml::tags( 'div', [ 'class' => 'mw-subpagenavigation-browse-navigation' ], $linkStrNamespace );
 
-
 		$linkDefs = [
 			'default' => 1,
 			'folders' => 2,
@@ -275,13 +273,10 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 		];
 
 		$links = [];
-
 		foreach ( $linkDefs as $name => $mode ) {
 			// Give grep a chance to find the usages:
-			// abusefilter-topnav-home, abusefilter-topnav-recentchanges, abusefilter-topnav-test,
-			// abusefilter-topnav-log, abusefilter-topnav-tools, abusefilter-topnav-examine
+			// subpagenavigation-browse-default, subpagenavigation-browse-folders, subpagenavigation-browse-filesystem,
 			$msgName = "subpagenavigation-browse-$name";
-
 			$msg = $this->msg( $msgName )->parse();
 
 			if ( $mode === (int)$this->getRequest()->getVal( 'mode' ) 
