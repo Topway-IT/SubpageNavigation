@@ -39,7 +39,7 @@
 
 		<row>
 			<cell class="col-3">
-				<component type="SubpageNavigation" />
+				<component type="SubpageNavigationTree" />
 			</cell>
 
 			<cell class="col-9">

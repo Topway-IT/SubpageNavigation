@@ -93,7 +93,7 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 		}
 
 		$this->prefix = $par . '/';
-		
+
 		if ( $title ) {
 			$this->namespace = $title->getNamespace();
 		} elseif ( !empty( $this->getRequest()->getVal( 'namespace' ) ) ) {
@@ -279,7 +279,7 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 			$msgName = "subpagenavigation-browse-$name";
 			$msg = $this->msg( $msgName )->parse();
 
-			if ( $mode === (int)$this->getRequest()->getVal( 'mode' ) 
+			if ( $mode === (int)$this->getRequest()->getVal( 'mode' )
 				|| ( empty( $this->getRequest()->getVal( 'mode' )
 					&& $mode === \SubpageNavigation::MODE_DEFAULT ) ) ) {
 				$links[] = Xml::tags( 'strong', null, $msg );
@@ -293,7 +293,7 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 			->text();
 		$linkStrMode = $this->msg( 'subpagenavigation-browse-topnav' )->parse() . " $linkStrMode";
 		$linkStrMode = Xml::tags( 'div', [ 'class' => 'mw-subpagenavigation-browse-navigation' ], $linkStrMode );
-		
+
 		$this->getOutput()->setSubtitle( $linkStrMode . '<br/>' . $linkStrNamespace );
 	}
 

@@ -2,7 +2,7 @@
 	"@metadata": {
 		"authors": []
 	},
-	
+
 	"subpagenavigation-tree": "Subpage navigation",
 	"subpagenavigation-portlet": "",
 	"subpagenavigation-extension-desc": "Shows direct children of current page in article navigation",
@@ -21,6 +21,9 @@
 	"subpagenavigation-browse-default": "default",
 	"subpagenavigation-browse-folders": "folders",
 	"subpagenavigation-browse-filesystem": "filesystem",
+	"apihelp-subpagenavigation-tree-summary": "subpagenavigation tree summary",
+	"apihelp-subpagenavigation-tree-param-title": "subpagenavigation tree param title",
+	"apihelp-subpagenavigation-tree-param-options": "subpagenavigation tree param options",
 
 	"subpagenavigation-toc-title": "Pages",
 	"subpagenavigation-tree-collapse": "collapse",

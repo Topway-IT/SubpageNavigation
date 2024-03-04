@@ -23,7 +23,7 @@
  */
 
 // @credits: https://www.mediawiki.org/wiki/Extension:CategoryTree
- 
+
 namespace MediaWiki\Extension\SubpageNavigation;
 
 use Exception;
@@ -41,13 +41,16 @@ class Tree {
 
 	/** @var array */
 	public $mOptions = [];
-	
+
 	/** @var Output */
 	public $output;
 
 	/** @var LinkRenderer */
 	private $linkRenderer;
-	
+
+	/**
+	 * @return array
+	 */
 	public static function getDataForJs() {
 		$tree = new Tree( $GLOBALS['wgSubpageNavigationDefaultOptions'] );
 		return [
@@ -63,7 +66,7 @@ class Tree {
 
 		$this->mOptions = array_merge( $options, [
 			'showcount' => true,
-			// 'namespace' => RequestContext::getMain()->getTitle()->getNamespace()	
+			// 'namespace' => RequestContext::getMain()->getTitle()->getNamespace()
 		] );
 	}
 
@@ -76,7 +79,6 @@ class Tree {
 	}
 
 	/**
-	 * @param int|null $depth
 	 * @return string
 	 */
 	public function getOptionsAsCacheKey() {
@@ -96,19 +98,15 @@ class Tree {
 	 * @return mixed
 	 */
 	public function getOptionsAsJsStructure() {
-		if ( $depth !== null ) {
-			$opt = $this->mOptions;
-			$opt[ 'namespace' ] = RequestContext::getMain()->getTitle()->getNamespace();
-			$s = self::encodeOptions( $opt, 'json' );
-		} else {
-			$s = self::encodeOptions( $this->mOptions, 'json' );
-		}
-
-		return $s;
+		$opt = $this->mOptions;
+		// $opt[ 'namespace' ] = RequestContext::getMain()->getTitle()->getNamespace();
+		return self::encodeOptions( $opt, 'json' );
 	}
 
 	/**
 	 * @see MediaWiki\Linker -> tocList
+	 * @param string $toc
+	 * @param Language|null $lang
 	 * @return mixed
 	 */
 	public static function tocList( $toc, Language $lang = null ) {
@@ -157,15 +155,15 @@ class Tree {
 		];
 
 		// $attr['data-subpagenavigation-options'] = $this->getOptionsAsJsStructure();
-		$attr['data-subpagenavigation-options'] =  self::encodeOptions( [
+		$attr['data-subpagenavigation-options'] = self::encodeOptions( [
 			'namespace' => $title->getNamespace()
 		], 'json' );
-		
+
 		$outText = Html::openElement( 'div', [ 'class' => '' ] );
 		$outText .= Html::closeElement( 'div' );
 
 		$outText .= $this->renderChildren( $title, false );
-		
+
 		$attr['class'] = $attr['class'] . ' subpageNavigation-tree mw-pt-translate-navigation noprint';
 
 		return Html::rawElement( 'div', $attr, $outText );
@@ -224,7 +222,7 @@ class Tree {
 		return $ret;
 	}
 
-	/** 
+	/**
 	 * @param Title $parentTitle null
 	 * @param Title $title
 	 * @param bool $api false
@@ -236,7 +234,7 @@ class Tree {
 		$label = $title->getText();
 
 		if ( $api ) {
-			$label = substr( $label, strlen( $parentTitle->getText() ) + 1);
+			$label = substr( $label, strlen( $parentTitle->getText() ) + 1 );
 		}
 
 		$link = $this->linkRenderer->makeLink( $title,
@@ -256,8 +254,8 @@ class Tree {
 		$attr = [ 'class' => 'SubpageNavigationTreeBullet' ];
 
 		$title_ = RequestContext::getMain()->getTitle();
-	 
-		$expanded = strpos( $title_->getText(), $title->getText() ) === 0;
+
+		$expanded = strpos( ( $title_ ? $title_->getText() : '' ), $title->getText() ) === 0;
 
 		if ( $count === 0 ) {
 			$bullet = '';
@@ -265,14 +263,14 @@ class Tree {
 
 			// *** or
 			$attr['class'] = 'SubpageNavigationTreePageBullet';
-			
+
 		} else {
 			$linkattr = [
 				'class' => 'SubpageNavigationTreeToggle',
 				'data-subpagenavigation-title' => $title->getDbKey(),
 			];
 
-			if ( !$expanded  ) {
+			if ( !$expanded ) {
 				$linkattr['data-subpagenavigation-state'] = 'collapsed';
 			} else {
 				$linkattr['data-subpagenavigation-loaded'] = true;
@@ -285,7 +283,7 @@ class Tree {
 		$ret .= Html::rawElement( 'span', $attr, $bullet ) . ' ';
 		$ret .= $link;
 
-		//  && $this->getOption( 'showcount' )
+		// && $this->getOption( 'showcount' )
 		if ( $count !== 0 ) {
 			$ret .= self::createCountString( RequestContext::getMain(), $count );
 		}
@@ -367,6 +365,7 @@ class Tree {
 
 	/**
 	 * @param string $title
+	 * @param int|null $namespace
 	 * @return null|Title
 	 */
 	public static function makeTitle( $title, $namespace = null ) {
@@ -378,5 +377,5 @@ class Tree {
 
 		return Title::newFromText( $title, $namespace );
 	}
-	
+
 }

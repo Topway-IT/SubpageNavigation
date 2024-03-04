@@ -147,14 +147,12 @@
 			formatversion: 2
 		} ).done( function ( data ) {
 			var $data;
-			data = data['subpagenavigation-tree'].html;
+			data = data[ 'subpagenavigation-tree' ].html;
 
 			if ( data === '' ) {
 				$data = $( '<i>' ).addClass( 'SubpageNavigationTreeNotice' )
-					// eslint-disable-next-line mediawiki/msg-doc
-					.text( mw.msg( {
-						0: 'subpagenavigation-tree-no-subpages'
-					}[ ctMode ] || 'subpagenavigation-tree-nothing-found' ) );
+					// or 'subpagenavigation-tree-nothing-found'
+					.text( mw.msg( 'subpagenavigation-tree-no-subpages' ) );
 			} else {
 				$data = $( $.parseHTML( data ) );
 				attachHandler( $data );
@@ -189,6 +187,6 @@
 		}
 	}
 
-	initToc( $( '#subpagenavigation-tree' ).get(0) );
+	initToc( $( '#subpagenavigation-tree' ).get( 0 ) );
 
 }() );

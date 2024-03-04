@@ -20,8 +20,9 @@
  * @author thomas-topway-it <support@topway.it>
  * @copyright Copyright ©2023, https://wikisphere.org
  */
-use MediaWiki\MediaWikiServices;
+
 use MediaWiki\Extension\SubpageNavigation\Tree as SubpageNavigationTree;
+use MediaWiki\MediaWikiServices;
 
 class SubpageNavigation {
 	const MODE_DEFAULT = 1;
@@ -230,14 +231,14 @@ class SubpageNavigation {
 				return MediaWikiServices::getInstance()->getLocalServerObjectCache();
 
 			case 'SessionCache':
-			default: 
+			default:
 				// @see MediaWiki\Session\SessionManager
 				$config = MediaWikiServices::getInstance()->getMainConfig();
 				$store = \ObjectCache::getInstance( $config->get( MediaWiki\MainConfigNames::SessionCacheType ) );
 				return new CachedBagOStuff( $store );
 		}
 	}
-	
+
 	/**
 	 * @param string $cond
 	 * @return int
@@ -269,7 +270,7 @@ class SubpageNavigation {
 		if ( $obj === false ) {
 			$obj = [];
 		}
-	
+
 		$dbr = wfGetDB( DB_REPLICA );
 		$cond = 'page_namespace = ' . $namespace
 			 . ' AND page_is_redirect = 0'
@@ -326,7 +327,7 @@ class SubpageNavigation {
 
 		$arr = [];
 		foreach ( $titlesText as $text ) {
-			$arr[] = 'page_title LIKE '  . $dbr->addQuotes(  str_replace( ' ', '_', $text ) . '%' );
+			$arr[] = 'page_title LIKE ' . $dbr->addQuotes( str_replace( ' ', '_', $text ) . '%' );
 		}
 
 		$cond = 'page_namespace = ' . $namespace
@@ -334,7 +335,7 @@ class SubpageNavigation {
 			 . ( count( $arr ) ? ' AND ( ' . implode( ' OR ', $arr ) . ')' : '' );
 
 		$touched = self::getTouched( $cond );
-		
+
 		$key = md5( $cond );
 		$key_ = 'subpage-navigation-children' . $key;
 
@@ -363,7 +364,7 @@ class SubpageNavigation {
 				}
 			}
 		// ----------------------
-		} else {		
+		} else {
 			$sqls = [];
 			foreach ( $titlesText as $text ) {
 				$text = str_replace( ' ', '_', $text );
@@ -425,7 +426,7 @@ class SubpageNavigation {
 				: '' );
 
 		$pageTable = $dbr->tableName( 'page' );
-		
+
 		// @FIXME use the new MediaWiko's SQL api if possible
 
 		switch ( $mode ) {
@@ -525,7 +526,7 @@ WHERE ( t2.page_title IS NULL OR t1.page_title = t2.page_title )
 	}
 
 	/**
-	 * @param Output
+	 * @param Output $output
 	 * @return string
 	 */
 	public static function getTreeHtml( $output ) {
@@ -535,7 +536,7 @@ WHERE ( t2.page_title IS NULL OR t1.page_title = t2.page_title )
 
 		// this creates a MW's TOC like toggle
 		return '<div id="subpagenavigation-tree" class="SubpageNavigationTreeContainer">'
-			. SubpageNavigationTree::tocList( $treeHtml ) . '</div>';			
+			. SubpageNavigationTree::tocList( $treeHtml ) . '</div>';
 	}
 
 }

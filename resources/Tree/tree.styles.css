@@ -1,4 +1,6 @@
 /* @credits: https://www.mediawiki.org/wiki/Extension:CategoryTree */
+/* stylelint-disable selector-max-id */
+/* stylelint-disable no-descending-specificity */
 
 .client-js #mw-subcategories ul {
 	list-style: none;
@@ -142,4 +144,3 @@
 	color: #8b0000;
 	font-weight: bold;
 }
-    

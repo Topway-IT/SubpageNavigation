@@ -21,8 +21,8 @@
  * @copyright Copyright ©2023-2024, https://wikisphere.org
  */
 
-use MediaWiki\MediaWikiServices;
 use MediaWiki\Extension\SubpageNavigation\Tree as SubpageNavigationTree;
+use MediaWiki\MediaWikiServices;
 
 class SubpageNavigationHooks {
 
@@ -30,7 +30,8 @@ class SubpageNavigationHooks {
 	 * @param MediaWikiServices $services
 	 * @return void
 	 */
-	public static function onMediaWikiServices( $services ) { }
+	public static function onMediaWikiServices( $services ) {
+	}
 
 	public static function onRegistration() {
 		// $GLOBALS['wgwgNamespacesWithSubpages'][NS_MAIN] = false;
@@ -97,8 +98,6 @@ class SubpageNavigationHooks {
 	}
 
 	/**
-	 * Hook implementation for injecting a category tree link into the sidebar.
-	 * Only does anything if $wgCategoryTreeSidebarRoot is set to a category name.
 	 * @param Skin $skin
 	 * @param string $portlet
 	 * @param string &$html
@@ -109,8 +108,14 @@ class SubpageNavigationHooks {
 		}
 	}
 
-	public static function onSkinTemplateNavigation_Universal( SkinTemplate $skinTemplate, array &$links ) {
-	}
+	/**
+	 * @param SkinTemplate $skinTemplate
+	 * @param array &$links
+	 * @param string &$html
+	 */
+	// phpcs:ignore MediaWiki.NamingConventions.LowerCamelFunctionsName.FunctionName
+	// public static function onSkinTemplateNavigation_Universal( SkinTemplate $skinTemplate, array &$links ) {
+	// }
 
 	/**
 	 * @param OutputPage $outputPage
@@ -188,7 +193,6 @@ class SubpageNavigationHooks {
 			'text'   => wfMessage( 'subpagenavigation-sidebar' )->text(),
 			'href'   => $specialpage_title->getLocalURL()
 		];
-
 	}
 
 }

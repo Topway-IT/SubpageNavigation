@@ -4,11 +4,10 @@ namespace MediaWiki\Extension\SubpageNavigation;
 
 use ApiBase;
 use ApiMain;
-use Config;
+// use Config;
 use ConfigFactory;
 use FormatJson;
-use MediaWiki\Languages\LanguageConverterFactory;
-use Title;
+// use MediaWiki\Languages\LanguageConverterFactory;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -47,7 +46,7 @@ class Api extends ApiBase {
 	public function __construct(
 		ApiMain $main,
 		$action,
-		ConfigFactory $configFactory,
+		ConfigFactory $configFactory
 	) {
 		parent::__construct( $main, $action );
 		$this->configFactory = $configFactory;
@@ -73,7 +72,11 @@ class Api extends ApiBase {
 		// $this->getMain()->setCacheMode( 'public' );
 		$this->getResult()->addContentValue( $this->getModuleName(), 'html', $html );
 	}
-	
+
+	/**
+	 * @param array $params
+	 * @return array
+	 */
 	private function extractOptions( $params ) {
 		$options = [];
 		if ( isset( $params['options'] ) ) {

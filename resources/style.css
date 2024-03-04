@@ -44,6 +44,5 @@
 }
 
 .toctogglecheckbox:checked ~ .subpageNavigation-tree {
-    display: none;
+	display: none;
 }
-

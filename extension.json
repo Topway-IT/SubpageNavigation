@@ -20,7 +20,7 @@
 	"AutoloadClasses": {
 		"SubpageNavigationHooks": "includes/SubpageNavigationHooks.php",
 		"SubpageNavigation": "includes/SubpageNavigation.php",
-		"Skins\\Chameleon\\Components\\SubpageNavigation": "includes/chameleon/component.php",
+		"Skins\\Chameleon\\Components\\SubpageNavigationTree": "includes/chameleon/SubpageNavigationTree.php",
 		"SubpageNavigationApiCheckLatestVersion": "includes/api/SubpageNavigationApiCheckLatestVersion.php",
 		"SpecialSubpageNavigationBrowse": "includes/specials/SpecialSubpageNavigationBrowse.php"
 	},
@@ -84,8 +84,8 @@
 			],
 			"styles": [
 				"Tree/tree.styles.css",
-				"Tree/tree.css"			
-			]			
+				"Tree/tree.css"
+			]
 		},
 		"ext.SubpageNavigation.tree": {
 			"packageFiles": [
