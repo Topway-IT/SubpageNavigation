@@ -49,32 +49,6 @@ class SubpageNavigation {
 	}
 
 	/**
-	 * @param string $cookieKey
-	 * @param string $cookieValue
-	 * @return 
-	 */
-	public static function setCookie( $cookieKey, $cookieValue ) {
-	    // setcookie( 'pageencryption-passwordkey', $protected_key_encoded, array $options = []): bool
-    	$context = RequestContext::getMain();
-    	$request = $context->getRequest();
-		$response = $request->response();
-		// $session = SessionManager::getGlobalSession();		
-		// $expiration = $session->getProvider()->getRememberUserDuration();
-		$cookieOptions = self::getCookieOptions();
-		
-		$session = $request->getSession();
-		
-		$sessionProvider = $session->getProvider();
-		// !( $session->getProvider() instanceof CookieSessionProvider )
-		// $info = $sessionProvider->provideSessionInfo( $request );
-		// $provider = $info->getProvider();
-		
-		// @TODO subtract (current time - login time)
-		$expiryValue = $sessionProvider->getRememberUserDuration() + time();
-		return $response->setCookie( $cookieKey, $cookieValue, $expiryValue, $cookieOptions );
-	}
-
-	/**
 	 * @param Title $title
 	 * @return string
 	 */
