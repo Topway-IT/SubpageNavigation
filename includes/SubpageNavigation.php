@@ -356,8 +356,8 @@ class SubpageNavigation {
 
 		$cond = 'page_namespace = ' . $namespace
 			 . ' AND page_is_redirect = 0'
-			 . ' AND ( ' . implode( ' OR ', $arr ) . ')';
-			 
+			 . ( count( $arr ) ? ' AND ( ' . implode( ' OR ', $arr ) . ')' : '' );
+
 		$touched = self::getTouched( $cond );
 		
 		$key = md5( $cond );
