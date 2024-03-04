@@ -16,6 +16,7 @@
 	"subpagenavigation-jsmodule-outdated-version": "This version of SubpageNavigation is outdated. <a href=\"https://www.mediawiki.org/wiki/Special:ExtensionDistributor/SubpageNavigation\">Update</a>",
 	"subpagenavigation-list-show-all": "show all...",
 	"subpagenavigation-browse-topnav": "mode",
+	"subpagenavigation-browse-topnav-namespace": "namespace",
 	"subpagenavigation-browse-default": "default",
 	"subpagenavigation-browse-folders": "folders",
 	"subpagenavigation-browse-filesystem": "filesystem",

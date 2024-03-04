@@ -8,9 +8,7 @@ use Config;
 use ConfigFactory;
 use FormatJson;
 use MediaWiki\Languages\LanguageConverterFactory;
-use ObjectCache;
 use Title;
-use WANObjectCache;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -41,33 +39,18 @@ class Api extends ApiBase {
 	/** @var ConfigFactory */
 	private $configFactory;
 
-	/** @var LanguageConverterFactory */
-	private $languageConverterFactory;
-
-	/** @var WANObjectCache */
-	private $wanCache;
-
-	/** @var srvCache */
-	private $srvCache;
-
 	/**
 	 * @param ApiMain $main
 	 * @param string $action
 	 * @param ConfigFactory $configFactory
-	 * @param LanguageConverterFactory $languageConverterFactory
-	 * @param WANObjectCache $wanCache
 	 */
 	public function __construct(
 		ApiMain $main,
 		$action,
 		ConfigFactory $configFactory,
-		LanguageConverterFactory $languageConverterFactory,
-		WANObjectCache $wanCache
 	) {
 		parent::__construct( $main, $action );
 		$this->configFactory = $configFactory;
-		$this->languageConverterFactory = $languageConverterFactory;
-		$this->wanCache = $wanCache;
 	}
 
 	/**
@@ -82,15 +65,12 @@ class Api extends ApiBase {
 			$this->dieWithError( [ 'apierror-invalidtitle', wfEscapeWikiText( $params['title'] ) ] );
 		}
 
-		$this->srvCache = ObjectCache::getLocalServerInstance( 'hash' );
-
 		$tree = new Tree( $options );
-		$config = $this->configFactory->makeConfig( 'subpagenavigation' );
+		// $config = $this->configFactory->makeConfig( 'subpagenavigation' );
 
-		$html = $this->getHTML( $tree, $title, $config );
-		// $html = trim( $ct->renderChildren( $title, true ) );
+		$html = trim( $tree->renderChildren( $title, true ) );
 
-		$this->getMain()->setCacheMode( 'public' );
+		// $this->getMain()->setCacheMode( 'public' );
 		$this->getResult()->addContentValue( $this->getModuleName(), 'html', $html );
 	}
 	
@@ -104,57 +84,6 @@ class Api extends ApiBase {
 			$options = get_object_vars( $options );
 		}
 		return $options;
-	}
-
-	/**
-	 * @param string $condition
-	 * @return bool|null|string
-	 */
-	public function getConditionalRequestData( $condition ) {
-		if ( $condition === 'last-modified' ) {
-			$params = $this->extractRequestParams();
-			$options = $this->extractOptions( $params );
-			$title = Tree::makeTitle( $params['title'], (int)$options['namespace'] );
-			return wfGetDB( DB_REPLICA )->selectField( 'page', 'page_touched',
-				[
-					'page_namespace' => $title->getNamespace(),
-					'page_title' => $title->getDBkey(),
-				],
-				__METHOD__
-			);
-		}
-	}
-
-	/**
-	 * @param Tree $tree
-	 * @param Title $title
-	 * @param Config $config
-	 * @return string HTML
-	 */
-	private function getHTML( Tree $tree, Title $title, Config $config ) {
-		$langConv = $this->languageConverterFactory->getLanguageConverter();
-		
-		
-
-		return $this->wanCache->getWithSetCallback(
-			$this->wanCache->makeKey(
-				'subpagenavigation-tree-html-ajax',
-				md5( $title->getDBkey() ),
-				$this->getLanguage()->getCode(),
-				$langConv->getExtraHashOptions(),
-				$config->get( 'RenderHashAppend' )
-			),
-			$this->wanCache::TTL_DAY,
-			static function () use ( $tree, $title ) {
-				return trim( $tree->renderChildren( $title, true ) );
-			},
-			[
-				'touchedCallback' => function () {
-					$timestamp = $this->getConditionalRequestData( 'last-modified' );
-					return $timestamp ? wfTimestamp( TS_UNIX, $timestamp ) : null;
-				}
-			]
-		);
 	}
 
 	/**

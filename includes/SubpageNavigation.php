@@ -247,12 +247,72 @@ class SubpageNavigation {
 	}
 
 	/**
+	 * @return CachedBagOStuff|LocalServerObjectCache
+	 */
+	public static function getCache() {
+		switch ( $GLOBALS['wgSubpageNavigationCacheStore'] ) {
+			case 'LocalServerObjectCache':
+				return MediaWikiServices::getInstance()->getLocalServerObjectCache();
+
+			case 'SessionCache':
+			default: 
+				// @see MediaWiki\Session\SessionManager
+				$config = MediaWikiServices::getInstance()->getMainConfig();
+				$store = \ObjectCache::getInstance( $config->get( MediaWiki\MainConfigNames::SessionCacheType ) );
+				return new CachedBagOStuff( $store );
+		}
+	}
+	
+	/**
+	 * @param string $cond
+	 * @return int
+	 */
+	public static function getTouched( $cond ) {
+		$dbr = wfGetDB( DB_REPLICA );
+		$pageTable = $dbr->tableName( 'page' );
+		$sql = "SELECT page_touched FROM $pageTable WHERE $cond ORDER BY page_touched DESC LIMIT 1";
+
+		$res = $dbr->query( $sql, __METHOD__ );
+		$row = $res->fetchObject();
+		if ( !$row ) {
+			return 0;
+		}
+
+		return $row->page_touched;
+	}
+
+	/**
 	 * @param string $prefix
 	 * @param int $namespace
 	 * @param int|null $limit
 	 * @return array
 	 */
 	public static function getSubpages( $prefix, $namespace, $limit = null ) {
+		$cache = self::getCache();
+		$obj = $cache->get( 'subpage-navigation-keys' );
+
+		if ( $obj === false ) {
+			$obj = [];
+		}
+	
+		$dbr = wfGetDB( DB_REPLICA );
+		$cond = 'page_namespace = ' . $namespace
+			 . ' AND page_is_redirect = 0'
+			 . ( $prefix != '/' ? ' AND page_title LIKE ' . $dbr->addQuotes( $prefix . '%' )
+				: '' );
+
+		$touched = self::getTouched( $cond );
+
+		$key = md5( $cond );
+		$key_ = 'subpage-navigation-' . $key;
+		if ( !empty( $obj[$key] ) && $obj[$key] === $touched ) {
+			$ret = $cache->get( $key_ );
+			// this should always be true
+			if ( $ret !== false ) {
+				return $ret;
+			}
+		}
+
 		$dbr = wfGetDB( DB_REPLICA );
 		$sql = self::subpagesSQL( $dbr, $prefix, $namespace, self::MODE_DEFAULT );
 		if ( $limit ) {
@@ -267,6 +327,11 @@ class SubpageNavigation {
 				$ret[] = $title;
 			}
 		}
+
+		$obj[$key] = $touched;
+		$cache->set( 'subpage-navigation-keys', $obj, $cache::TTL_INDEFINITE );
+		$cache->set( $key_, $ret, $cache::TTL_INDEFINITE );
+
 		return $ret;
 	}
 
@@ -277,6 +342,35 @@ class SubpageNavigation {
 	 * @return array
 	 */
 	public static function getChildrenCount( $dbr, $titlesText, $namespace ) {
+		$cache = self::getCache();
+		$obj = $cache->get( 'subpage-navigation-children-keys' );
+
+		if ( $obj === false ) {
+			$obj = [];
+		}
+
+		$arr = [];
+		foreach ( $titlesText as $text ) {
+			$arr[] = 'page_title LIKE '  . $dbr->addQuotes(  str_replace( ' ', '_', $text ) . '%' );
+		}
+
+		$cond = 'page_namespace = ' . $namespace
+			 . ' AND page_is_redirect = 0'
+			 . ' AND ( ' . implode( ' OR ', $arr ) . ')';
+			 
+		$touched = self::getTouched( $cond );
+		
+		$key = md5( $cond );
+		$key_ = 'subpage-navigation-children' . $key;
+
+		if ( !empty( $obj[$key] ) && $obj[$key] === $touched ) {
+			$ret = $cache->get( $key_ );
+			// this should always be true
+			if ( $ret !== false ) {
+				return $ret;
+			}
+		}
+
 		// @ATTENTION!! queryMulti has been removed
 		// from Wikimedia\Rdbms\Database since MW 1.4.1 !!
 		if ( !method_exists( $dbr, 'queryMulti' ) ) {
@@ -293,27 +387,32 @@ class SubpageNavigation {
 					$ret[] = $row->count;
 				}
 			}
-			return $ret;
 		// ----------------------
-		}
-		$sqls = [];
-		foreach ( $titlesText as $text ) {
-			$text = str_replace( ' ', '_', $text );
-			$sqls[] = self::subpagesSQL( $dbr, "{$text}/", $namespace, self::MODE_COUNT );
-		}
+		} else {		
+			$sqls = [];
+			foreach ( $titlesText as $text ) {
+				$text = str_replace( ' ', '_', $text );
+				$sqls[] = self::subpagesSQL( $dbr, "{$text}/", $namespace, self::MODE_COUNT );
+			}
 
-		$resMap = $dbr->queryMulti( $sqls, __METHOD__ );
-		// @see DatabaseMysqlTest
-		reset( $resMap );
-		$ret = [];
-		foreach ( $resMap as $i => $qs ) {
-			if ( is_iterable( $qs->res ) ) {
-				foreach ( $qs->res as $row ) {
-					$ret[] = $row->count;
-					break;
+			$resMap = $dbr->queryMulti( $sqls, __METHOD__ );
+			// @see DatabaseMysqlTest
+			reset( $resMap );
+			$ret = [];
+			foreach ( $resMap as $i => $qs ) {
+				if ( is_iterable( $qs->res ) ) {
+					foreach ( $qs->res as $row ) {
+						$ret[] = $row->count;
+						break;
+					}
 				}
 			}
 		}
+
+		$obj[$key] = $touched;
+		$cache->set( 'subpage-navigation-children-keys', $obj, $cache::TTL_INDEFINITE );
+		$cache->set( $key_, $ret, $cache::TTL_INDEFINITE );
+
 		return $ret;
 	}
 

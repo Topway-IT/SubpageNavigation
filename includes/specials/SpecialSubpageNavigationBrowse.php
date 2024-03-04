@@ -23,6 +23,7 @@
  */
 
 use MediaWiki\MainConfigNames;
+use MediaWiki\MediaWikiServices;
 
 class SpecialSubpageNavigationBrowse extends QueryPage {
 
@@ -64,7 +65,8 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 		}
 
 		$this->title = $title;
-		$this->addNavigationLinks( $par );
+		$this->addNavigationLinks();
+
 		$multiplePages = ( $this->numRows > 20 || $this->offset > 0 );
 
 		if ( $par ) {
@@ -76,7 +78,14 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 				: $this->msg( 'subpagenavigation-specialsubpages-root' )->parse();
 
 			$out->addHTML( $this->msg( 'subpagenavigation-specialsubpages-return',
-				$this->getSpecialLink( $parentTitle, $label, $this->getRequest()->getVal( 'mode' ), $attr ) )->text() );
+				$this->getSpecialLink(
+					$parentTitle,
+					$label,
+					(int)$this->getRequest()->getVal( 'mode' ),
+					(int)$this->getRequest()->getVal( 'namespace' ),
+					$attr )
+				)->text()
+			);
 
 			if ( $multiplePages ) {
 				$out->addHTML( '<br />' );
@@ -87,8 +96,8 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 		
 		if ( $title ) {
 			$this->namespace = $title->getNamespace();
-		} elseif ( !empty( $_GET[ 'namespace' ] ) ) {
-			$this->namespace = (int)$_GET[ 'namespace' ];
+		} elseif ( !empty( $this->getRequest()->getVal( 'namespace' ) ) ) {
+			$this->namespace = (int)$this->getRequest()->getVal( 'namespace' );
 		} else {
 			$this->namespace = NS_MAIN;
 		}
@@ -218,22 +227,47 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 	 * @param Title $title
 	 * @param string $label
 	 * @param int $mode
+	 * @param int $namespace
 	 * @param array $attr
 	 * @return string
 	 */
-	private function getSpecialLink( $title, $label, $mode, $attr = [] ) {
+	private function getSpecialLink( $title, $label, $mode, $namespace, $attr = [] ) {
 		$specialPage = SpecialPage::getTitleFor( 'SubpageNavigationBrowse', $title ? $title->getDBkey() : null );
 
 		return Html::rawElement( 'a', array_merge( [
-			'href' => wfAppendQuery( $specialPage->getLocalURL(), 'mode=' . $mode )
+			'href' => wfAppendQuery( $specialPage->getLocalURL(), 'mode=' . $mode . '&namespace=' . $namespace )
 		], $attr ), HtmlArmor::getHtml( $label ) );
 	}
 
 	/**
 	 * @see AbuseFilterSpecialPage
-	 * @param string $pageType
 	 */
-	protected function addNavigationLinks( $pageType ) {
+	protected function addNavigationLinks() {
+		$formattedNamespaces = MediaWikiServices::getInstance()
+			->getContentLanguage()->getFormattedNamespaces();
+			
+
+		$links = [];
+		foreach ( $formattedNamespaces as $mode => $name ) {
+			if ( $mode < 0 || $mode % 2 !== 0 ) {
+				continue;
+			}
+			$msg = !empty( $name ) ? $name : 'Main';
+
+			if ( $mode === (int)$this->getRequest()->getVal( 'namespace' ) ) {
+				$links[] = Xml::tags( 'strong', null, $msg );
+			} else {
+				$links[] = $this->getSpecialLink( $this->title, $msg, (int)$this->getRequest()->getVal( 'mode' ), $mode );
+			}
+		}
+
+		$linkStrNamespace = $this->msg( 'parentheses' )
+			->rawParams( $this->getLanguage()->pipeList( $links ) )
+			->text();
+		$linkStrNamespace = $this->msg( 'subpagenavigation-browse-topnav-namespace' )->parse() . " $linkStrNamespace";
+		$linkStrNamespace = Xml::tags( 'div', [ 'class' => 'mw-subpagenavigation-browse-navigation' ], $linkStrNamespace );
+
+
 		$linkDefs = [
 			'default' => 1,
 			'folders' => 2,
@@ -242,7 +276,7 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 
 		$links = [];
 
-		foreach ( $linkDefs as $name => $page ) {
+		foreach ( $linkDefs as $name => $mode ) {
 			// Give grep a chance to find the usages:
 			// abusefilter-topnav-home, abusefilter-topnav-recentchanges, abusefilter-topnav-test,
 			// abusefilter-topnav-log, abusefilter-topnav-tools, abusefilter-topnav-examine
@@ -250,21 +284,20 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 
 			$msg = $this->msg( $msgName )->parse();
 
-			if ( $name === $pageType ) {
+			if ( $mode === (int)$this->getRequest()->getVal( 'mode' ) ) {
 				$links[] = Xml::tags( 'strong', null, $msg );
 			} else {
-				$links[] = $this->getSpecialLink( $this->title, $msg, $page );
+				$links[] = $this->getSpecialLink( $this->title, $msg, $mode, (int)$this->getRequest()->getVal( 'namespace' ) );
 			}
 		}
 
-		$linkStr = $this->msg( 'parentheses' )
+		$linkStrMode = $this->msg( 'parentheses' )
 			->rawParams( $this->getLanguage()->pipeList( $links ) )
 			->text();
-		$linkStr = $this->msg( 'subpagenavigation-browse-topnav' )->parse() . " $linkStr";
-
-		$linkStr = Xml::tags( 'div', [ 'class' => 'mw-subpagenavigation-browse-navigation' ], $linkStr );
-
-		$this->getOutput()->setSubtitle( $linkStr );
+		$linkStrMode = $this->msg( 'subpagenavigation-browse-topnav' )->parse() . " $linkStrMode";
+		$linkStrMode = Xml::tags( 'div', [ 'class' => 'mw-subpagenavigation-browse-navigation' ], $linkStrMode );
+		
+		$this->getOutput()->setSubtitle( $linkStrMode . '<br/>' . $linkStrNamespace );
 	}
 
 	/**
@@ -285,7 +318,8 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 		// $dom->loadHTML( mb_convert_encoding( $html, 'HTML-ENTITIES', 'UTF-8' ) );
 		foreach ( $html->getElementsByTagName( 'a' ) as $node ) {
 			$href = $node->getAttribute( 'href' );
-			$node->setAttribute( 'href', "$href&mode=" . $request->getVal( 'mode' ) );
+			$node->setAttribute( 'href', "$href&mode=" . $request->getVal( 'mode' )
+				. '&namespace=' . $request->getVal( 'namespace' ) );
 		}
 		return $html->saveHtml();
 	}
@@ -345,7 +379,7 @@ class SpecialSubpageNavigationBrowse extends QueryPage {
 				'style' => 'font-weight:bold'
 			];
 			$msg = $display_title . ' (' . $result->childCount . ')';
-			return $this->getSpecialLink( $title, $msg, $this->getRequest()->getVal( 'mode' ), $attr );
+			return $this->getSpecialLink( $title, $msg, (int)$this->getRequest()->getVal( 'mode' ), $this->namespace, $attr );
 		}
 
 		return $this->LinkRenderer->makeKnownLink( $title, $display_title );

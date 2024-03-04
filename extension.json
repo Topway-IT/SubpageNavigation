@@ -46,9 +46,7 @@
 		"subpagenavigation-tree": {
 			"class": "MediaWiki\\Extension\\SubpageNavigation\\Api",
 			"services": [
-				"ConfigFactory",
-				"LanguageConverterFactory",
-				"MainWANObjectCache"
+				"ConfigFactory"
 			]
 		},
 		"subpagenavigation-check-latest-version": "SubpageNavigationApiCheckLatestVersion"
@@ -113,14 +111,17 @@
 		}
 	},
 	"config": {
+		"SubpageNavigationCacheStore": {
+			"value": "SessionCache"
+		},
 		"SubpageNavigationShowTree": {
-				"value": true
+			"value": true
 		},
 		"SubpageNavigationShowCount": {
-				"value": true
+			"value": true
 		},
 		"SubpageNavigationTreeLimit": {
-				"value": 30
+			"value": 30
 		},
 		"SubpageNavigationDisableCache": {
 			"value": 21600
@@ -131,8 +132,5 @@
 			}
 		}
 	},
-	"ServiceWiringFiles": [
-		"includes/ServiceWiring.php"
-	],
 	"manifest_version": 2
 }
